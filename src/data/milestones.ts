@@ -56,8 +56,16 @@ export const MILESTONES: MilestoneInput[] = [
     tags: ["家庭旅遊"],
     highlight: true,
   },
-
-
+  {
+    date: "2026-06-13",
+    endDate: "2026-06-14",
+    title: "礁溪天公廟做膽",
+    who: ["uwa", "una"],
+    category: "holiday",
+    place: "宜蘭礁溪",
+    tags: ["習俗", "宜蘭"],
+    highlight: true,
+  },
 
   /* 以下是各種寫法的範例，用不到可以整段刪掉。
 
