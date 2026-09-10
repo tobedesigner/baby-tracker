@@ -1,0 +1,39 @@
+/* 色票、深色模式、字型。改整站配色從這裡的變數改。 */
+
+:root{
+  --accent:#8C7B6E;
+  --bg:#FBF7F2;
+  --surface:#FFFFFF;
+  --surface-2:#F4EEE7;
+  --ink:#39322E;
+  --ink-2:#6B605A;
+  --muted:#9C9088;
+  --line:#E7DED4;
+  --rail:#E0D5C8;
+  --shadow:0 1px 2px rgba(58,45,36,.05), 0 8px 24px rgba(58,45,36,.06);
+  --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#17140F;
+    --surface:#211D18;
+    --surface-2:#2A251F;
+    --ink:#F0E9E1;
+    --ink-2:#C3B8AE;
+    --muted:#8E837A;
+    --line:#332D26;
+    --rail:#3A342C;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.28);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:16px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}

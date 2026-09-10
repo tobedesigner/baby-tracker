@@ -1,0 +1,58 @@
+/* =========================================================
+   斷點。手機是預設樣式，這裡只放平板以上要覆蓋的部分。
+   ========================================================= */
+
+/* =========================================================
+   平板
+   ========================================================= */
+@media (min-width:640px){
+  body{font-size:16.5px}
+  .shell{max-width:760px;padding:0 28px 88px}
+  header{padding:56px 0 22px}
+  h1{font-size:38px}
+  .subtitle{font-size:16px}
+  .ages{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:8px}
+  .controls{margin:18px -28px 0;padding:12px 28px}
+  .card{padding:17px 20px}
+  .card h3{font-size:19px}
+  .card .note{font-size:15px}
+  .charts{grid-template-columns:1fr 1fr}
+  .shots{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+}
+
+/* =========================================================
+   桌機：左欄固定
+   ========================================================= */
+@media (min-width:1000px){
+  .shell{
+    max-width:1160px;display:grid;grid-template-columns:290px minmax(0,1fr);
+    gap:0 56px;align-items:start;padding:0 40px 96px;
+  }
+  .side{position:sticky;top:0;align-self:start;padding:56px 0 24px}
+  header{padding:0;text-align:left}
+  .hi{margin-bottom:12px}
+  h1{font-size:36px}
+  .who-switch{display:flex;margin-top:18px}
+  .who-switch button{flex:1 1 auto;justify-content:center;padding:6px 10px}
+  .ages{flex-direction:column;align-items:stretch;gap:6px}
+  .agepill{border-radius:12px;padding:9px 14px;justify-content:flex-start}
+
+  .controls{
+    position:static;margin:22px 0 0;padding:0;
+    background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border:0;
+  }
+  .controls.stuck{border-bottom-color:transparent}
+  .chips{flex-wrap:wrap;overflow:visible;gap:8px}
+  .meta-row{flex-direction:column;align-items:flex-start;gap:6px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+
+  .main{padding-top:56px;min-width:0}
+  .year:first-child{margin-top:0}
+  .card{padding:18px 22px}
+  .card h3{font-size:19.5px}
+  .growth{margin-top:44px}
+  footer{margin-top:48px;text-align:left;padding-left:4px}
+}
+
+@media (min-width:1360px){
+  .shell{max-width:1280px;grid-template-columns:320px minmax(0,1fr);gap:0 72px}
+}

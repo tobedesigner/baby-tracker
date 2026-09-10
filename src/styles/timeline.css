@@ -1,0 +1,59 @@
+/* 時間軸：年份分隔、軸線與圓點、里程碑卡片、照片、出生節點。 */
+
+/* ---------- 時間軸 ---------- */
+.year{display:flex;align-items:center;gap:12px;margin:32px 0 16px;padding-left:4px}
+.year span{font-size:13px;color:var(--muted);letter-spacing:.1em;font-variant-numeric:tabular-nums}
+.year::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.tl{position:relative;padding-left:30px}
+.tl::before{
+  content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,transparent 0,var(--rail) 26px,var(--rail) calc(100% - 26px),transparent 100%);
+}
+.item{position:relative;margin:0 0 16px}
+.item::before{
+  content:"";position:absolute;left:-30px;top:20px;width:14px;height:14px;border-radius:50%;
+  background:var(--bg);border:3px solid var(--c,var(--rail));box-shadow:0 0 0 4px var(--bg);
+}
+.item.hl::before{background:var(--c,var(--accent))}
+/* 跨天的事在時間軸上畫成一小段，不是一個點 */
+.item.range::before{height:30px;border-radius:7px;top:18px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px;box-shadow:var(--shadow)}
+.item.hl .card{border-color:color-mix(in srgb, var(--c,var(--accent)) 45%, var(--line))}
+.card .top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:5px}
+.card .date{font-variant-numeric:tabular-nums;color:var(--ink-2);font-weight:500}
+.card .age{color:var(--muted)}
+.card .age b{color:var(--wc,var(--ink-2));font-weight:600;margin-right:3px}
+.card .dur{color:var(--muted);background:var(--surface-2);border-radius:5px;padding:1px 7px;font-size:11.5px}
+.card .cat{margin-left:auto;display:inline-flex;align-items:center;gap:5px;color:var(--cc,var(--muted));font-size:12px;white-space:nowrap}
+.card .cat i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.card h3{margin:0;font-size:18px;line-height:1.45;font-weight:650;letter-spacing:.01em}
+.card .note{margin:8px 0 0;color:var(--ink-2);font-size:14.5px;white-space:pre-line}
+.card .foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;align-items:center}
+.tag{font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border-radius:6px;padding:2.5px 8px}
+.tag.where::before{content:"📍 "}
+.tag.who2::before{content:"👤 "}
+.ms{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.ms b{font-size:12.5px;font-weight:500;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:4px 10px;font-variant-numeric:tabular-nums}
+.ms b em{font-style:normal;color:var(--muted);font-size:11px;margin-right:4px}
+
+.shots{display:grid;gap:6px;margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
+.shots img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--surface-2);cursor:zoom-in;display:block}
+.shots.one{grid-template-columns:1fr}
+.shots.one img{aspect-ratio:auto;max-height:60vh;object-fit:contain}
+
+.birth{position:relative;margin:0 0 16px}
+.birth::before{
+  content:"";position:absolute;left:-30px;top:14px;width:14px;height:14px;border-radius:50%;
+  background:var(--c,var(--accent));border:3px solid var(--c,var(--accent));box-shadow:0 0 0 4px var(--bg);
+}
+.birth .card{background:var(--surface-2);border-style:dashed}
+.birth h3{font-size:16px}
+
+.empty{text-align:center;color:var(--muted);font-size:14px;padding:52px 20px;border:1px dashed var(--line);border-radius:var(--radius);margin-top:22px}
+
+@media (prefers-reduced-motion:no-preference){
+  .item,.birth{animation:rise .38s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
