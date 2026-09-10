@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>成長里程碑</title>
+<meta name="description" content="成長里程碑時間軸">
+<meta property="og:type" content="website">
+<meta property="og:title" content="成長里程碑">
+<meta property="og:description" content="成長里程碑時間軸">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🍼</text></svg>">
+<style>
+:root{
+  --accent:#8C7B6E;
+  --bg:#FBF7F2;
+  --surface:#FFFFFF;
+  --surface-2:#F4EEE7;
+  --ink:#39322E;
+  --ink-2:#6B605A;
+  --muted:#9C9088;
+  --line:#E7DED4;
+  --rail:#E0D5C8;
+  --shadow:0 1px 2px rgba(58,45,36,.05), 0 8px 24px rgba(58,45,36,.06);
+  --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#17140F;
+    --surface:#211D18;
+    --surface-2:#2A251F;
+    --ink:#F0E9E1;
+    --ink-2:#C3B8AE;
+    --muted:#8E837A;
+    --line:#332D26;
+    --rail:#3A342C;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.28);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:16px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* =========================================================
+   版面骨架
+   手機   ：單欄，header → 篩選（吸頂）→ 時間軸 → 生長 → 頁尾
+   平板   ：同單欄，加寬、字級與間距放大
+   桌機   ：左側固定欄（名字＋切換＋篩選）＋右側時間軸
+   ========================================================= */
+.shell{max-width:680px;margin:0 auto;padding:0 18px 72px}
+
+/* ---------- header ---------- */
+header{padding:40px 0 20px;text-align:center}
+.hi{font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
+h1{margin:0;font-size:32px;line-height:1.25;font-weight:700;letter-spacing:.01em;transition:color .2s}
+.subtitle{margin:8px 0 0;color:var(--ink-2);font-size:15px}
+
+/* 寶寶切換 */
+.who-switch{
+  display:inline-flex;gap:4px;margin-top:16px;padding:4px;
+  background:var(--surface-2);border-radius:999px;max-width:100%;overflow-x:auto;
+  scrollbar-width:none;
+}
+.who-switch::-webkit-scrollbar{display:none}
+.who-switch button{
+  appearance:none;cursor:pointer;border:0;background:none;font-family:inherit;
+  padding:6px 15px;border-radius:999px;font-size:14px;color:var(--ink-2);
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  transition:background .16s,color .16s,box-shadow .16s;
+}
+.who-switch button i{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.7;flex:0 0 auto}
+.who-switch button[aria-pressed="true"]{
+  background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow);
+}
+.who-switch button[aria-pressed="true"] i{opacity:1}
+
+.ages{margin-top:16px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.agepill{
+  display:inline-flex;align-items:baseline;gap:8px;padding:7px 15px;
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  font-size:14px;color:var(--ink-2);box-shadow:var(--shadow);
+}
+.agepill .who{font-weight:600;color:var(--wc,var(--ink))}
+.agepill b{color:var(--wc,var(--accent));font-weight:600}
+.agepill .bd{color:var(--muted);font-size:12px}
+
+/* ---------- 篩選列 ---------- */
+.controls{
+  position:sticky;top:0;z-index:20;
+  margin:16px -18px 0;padding:10px 18px;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:saturate(1.4) blur(12px);
+  -webkit-backdrop-filter:saturate(1.4) blur(12px);
+  border-bottom:1px solid transparent;transition:border-color .2s;
+}
+.controls.stuck{border-bottom-color:var(--line)}
+.chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;appearance:none;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+  border-radius:999px;padding:6px 13px;font-size:13px;font-family:inherit;
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.chip:hover{border-color:var(--rail)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.85;flex:0 0 auto}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"] .dot{background:var(--bg)}
+.chip .n{font-size:11px;opacity:.6;margin-left:2px}
+.meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px;font-size:12.5px;color:var(--muted)}
+.sortbtn{
+  appearance:none;background:none;border:0;padding:4px 0;color:var(--muted);
+  font-size:12.5px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+}
+.sortbtn:hover{color:var(--ink-2)}
+.sortbtn svg{width:13px;height:13px;flex:0 0 auto}
+
+/* ---------- 時間軸 ---------- */
+.year{display:flex;align-items:center;gap:12px;margin:32px 0 16px;padding-left:4px}
+.year span{font-size:13px;color:var(--muted);letter-spacing:.1em;font-variant-numeric:tabular-nums}
+.year::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.tl{position:relative;padding-left:30px}
+.tl::before{
+  content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,transparent 0,var(--rail) 26px,var(--rail) calc(100% - 26px),transparent 100%);
+}
+.item{position:relative;margin:0 0 16px}
+.item::before{
+  content:"";position:absolute;left:-30px;top:20px;width:14px;height:14px;border-radius:50%;
+  background:var(--bg);border:3px solid var(--c,var(--rail));box-shadow:0 0 0 4px var(--bg);
+}
+.item.hl::before{background:var(--c,var(--accent))}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px;box-shadow:var(--shadow)}
+.item.hl .card{border-color:color-mix(in srgb, var(--c,var(--accent)) 45%, var(--line))}
+.card .top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:5px}
+.card .date{font-variant-numeric:tabular-nums;color:var(--ink-2);font-weight:500}
+.card .age{color:var(--muted)}
+.card .age b{color:var(--wc,var(--ink-2));font-weight:600;margin-right:3px}
+.card .cat{margin-left:auto;display:inline-flex;align-items:center;gap:5px;color:var(--cc,var(--muted));font-size:12px;white-space:nowrap}
+.card .cat i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.card h3{margin:0;font-size:18px;line-height:1.45;font-weight:650;letter-spacing:.01em}
+.card .note{margin:8px 0 0;color:var(--ink-2);font-size:14.5px;white-space:pre-line}
+.card .foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;align-items:center}
+.tag{font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border-radius:6px;padding:2.5px 8px}
+.tag.where::before{content:"📍 "}
+.tag.who2::before{content:"👤 "}
+.ms{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.ms b{font-size:12.5px;font-weight:500;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:4px 10px;font-variant-numeric:tabular-nums}
+.ms b em{font-style:normal;color:var(--muted);font-size:11px;margin-right:4px}
+
+.shots{display:grid;gap:6px;margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
+.shots img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--surface-2);cursor:zoom-in;display:block}
+.shots.one{grid-template-columns:1fr}
+.shots.one img{aspect-ratio:auto;max-height:60vh;object-fit:contain}
+
+.birth{position:relative;margin:0 0 16px}
+.birth::before{
+  content:"";position:absolute;left:-30px;top:14px;width:14px;height:14px;border-radius:50%;
+  background:var(--c,var(--accent));border:3px solid var(--c,var(--accent));box-shadow:0 0 0 4px var(--bg);
+}
+.birth .card{background:var(--surface-2);border-style:dashed}
+.birth h3{font-size:16px}
+
+/* ---------- 生長曲線 ---------- */
+.growth{margin-top:36px}
+.growth h2{font-size:15px;margin:0 0 4px;font-weight:600}
+.growth p.hint{margin:0 0 14px;font-size:12.5px;color:var(--muted)}
+.charts{display:grid;gap:12px;grid-template-columns:1fr}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 15px 10px;box-shadow:var(--shadow)}
+.chart .ct{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;gap:8px}
+.chart .ct h4{margin:0;font-size:13px;font-weight:600;color:var(--ink-2)}
+.chart .ct span{font-size:16px;font-weight:650;color:var(--accent);font-variant-numeric:tabular-nums}
+.chart .lg{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 8px;font-size:11.5px;color:var(--muted)}
+.chart .lg span{display:inline-flex;align-items:center;gap:5px}
+.chart .lg i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.chart .lg b{font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.chart svg{width:100%;height:96px;display:block;overflow:visible}
+.chart .xl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+
+.empty{text-align:center;color:var(--muted);font-size:14px;padding:52px 20px;border:1px dashed var(--line);border-radius:var(--radius);margin-top:22px}
+footer{margin-top:40px;text-align:center;font-size:12px;color:var(--muted);line-height:2}
+
+.lb{position:fixed;inset:0;z-index:60;display:none;background:rgba(20,16,12,.92);align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:100%;border-radius:8px}
+
+@media (prefers-reduced-motion:no-preference){
+  .item,.birth{animation:rise .38s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+
+/* =========================================================
+   平板
+   ========================================================= */
+@media (min-width:640px){
+  body{font-size:16.5px}
+  .shell{max-width:760px;padding:0 28px 88px}
+  header{padding:56px 0 22px}
+  h1{font-size:38px}
+  .subtitle{font-size:16px}
+  .ages{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:8px}
+  .controls{margin:18px -28px 0;padding:12px 28px}
+  .card{padding:17px 20px}
+  .card h3{font-size:19px}
+  .card .note{font-size:15px}
+  .charts{grid-template-columns:1fr 1fr}
+  .shots{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+}
+
+/* =========================================================
+   桌機：左欄固定
+   ========================================================= */
+@media (min-width:1000px){
+  .shell{
+    max-width:1160px;display:grid;grid-template-columns:290px minmax(0,1fr);
+    gap:0 56px;align-items:start;padding:0 40px 96px;
+  }
+  .side{position:sticky;top:0;align-self:start;padding:56px 0 24px}
+  header{padding:0;text-align:left}
+  .hi{margin-bottom:12px}
+  h1{font-size:36px}
+  .who-switch{display:flex;margin-top:18px}
+  .who-switch button{flex:1 1 auto;justify-content:center;padding:6px 10px}
+  .ages{flex-direction:column;align-items:stretch;gap:6px}
+  .agepill{border-radius:12px;padding:9px 14px;justify-content:flex-start}
+
+  .controls{
+    position:static;margin:22px 0 0;padding:0;
+    background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border:0;
+  }
+  .controls.stuck{border-bottom-color:transparent}
+  .chips{flex-wrap:wrap;overflow:visible;gap:8px}
+  .meta-row{flex-direction:column;align-items:flex-start;gap:6px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+
+  .main{padding-top:56px;min-width:0}
+  .year:first-child{margin-top:0}
+  .card{padding:18px 22px}
+  .card h3{font-size:19.5px}
+  .growth{margin-top:44px}
+  footer{margin-top:48px;text-align:left;padding-left:4px}
+}
+
+@media (min-width:1360px){
+  .shell{max-width:1280px;grid-template-columns:320px minmax(0,1fr);gap:0 72px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="side">
+    <header>
+      <p class="hi">MILESTONES</p>
+      <h1 id="name">成長里程碑</h1>
+      <p class="subtitle" id="sub"></p>
+      <div class="who-switch" id="whoswitch" hidden></div>
+      <div class="ages" id="ages"></div>
+    </header>
+
+    <div class="controls" id="controls">
+      <div class="chips" id="chips"></div>
+      <div class="meta-row">
+        <span id="count"></span>
+        <button class="sortbtn" id="sort" type="button">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 3v10M4 13l-2.2-2.4M4 13l2.2-2.4M11 13V3M11 3L8.8 5.4M11 3l2.2 2.4"/></svg>
+          <span id="sortlabel">新的在上</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <main id="list"></main>
+    <section class="growth" id="growth" hidden></section>
+    <footer><div id="updated"></div></footer>
+  </div>
+
+</div>
+
+<div class="lb" id="lb"><img alt=""></div>
+
+<script src="data/site.js"></script>
+<script src="data/babies.js"></script>
+<script src="data/milestones.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var SITE   = window.SITE || {};
+  var BABIES = (window.BABIES || []).filter(function(b){ return b && b.id; });
+  var RAW    = window.BABY_MILESTONES || [];
+
+  var CATS = {
+    first:   { label:"第一次", color:"#E4785F" },
+    growth:  { label:"成長",   color:"#7FA46F" },
+    health:  { label:"健康",   color:"#6E9EC4" },
+    care:    { label:"照護",   color:"#C99038" },
+    daily:   { label:"日常",   color:"#A38BBE" },
+    travel:  { label:"出遊",   color:"#4FA79A" },
+    holiday: { label:"節日",   color:"#D57C9D" }
+  };
+
+  /* ---------- helpers ---------- */
+  function el(tag, cls, txt){
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (txt != null) n.textContent = txt;
+    return n;
+  }
+  function parseDate(s){
+    if (!s) return null;
+    var m = String(s).trim().match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+    if (!m) return null;
+    var d = new Date(+m[1], +m[2]-1, +m[3]);
+    return isNaN(d) ? null : d;
+  }
+  function fmtDate(d){
+    var wd = ["日","一","二","三","四","五","六"][d.getDay()];
+    return d.getFullYear() + "/" + String(d.getMonth()+1).padStart(2,"0")
+         + "/" + String(d.getDate()).padStart(2,"0") + "（" + wd + "）";
+  }
+  function fmtShort(d){
+    return d.getFullYear() + "/" + String(d.getMonth()+1).padStart(2,"0")
+         + "/" + String(d.getDate()).padStart(2,"0");
+  }
+  function diff(b, d){
+    var sign = d < b ? -1 : 1;
+    var a = sign > 0 ? b : d, z = sign > 0 ? d : b;
+    var y = z.getFullYear() - a.getFullYear();
+    var m = z.getMonth() - a.getMonth();
+    var day = z.getDate() - a.getDate();
+    if (day < 0){ m -= 1; day += new Date(z.getFullYear(), z.getMonth(), 0).getDate(); }
+    if (m < 0){ y -= 1; m += 12; }
+    return { y:y, m:m, d:day, sign:sign, months:y*12+m };
+  }
+  function ageText(b, d){
+    if (!b) return "";
+    var t = diff(b, d);
+    if (t.sign < 0) return "出生前 " + Math.round((b - d) / 86400000) + " 天";
+    if (t.y === 0 && t.m === 0 && t.d === 0) return "出生當天";
+    if (t.y === 0 && t.m === 0) return "出生 " + t.d + " 天";
+    if (t.y === 0) return t.m + " 個月" + (t.d ? "又 " + t.d + " 天" : "");
+    return t.y + " 歲" + (t.m ? " " + t.m + " 個月" : "");
+  }
+
+  /* ---------- 寶寶 ---------- */
+  BABIES.forEach(function(b){ b.bd = parseDate(b.birthday); });
+  var BY_ID = {};
+  BABIES.forEach(function(b){ BY_ID[b.id] = b; });
+  var ALL_IDS = BABIES.map(function(b){ return b.id; });
+  var MULTI = BABIES.length > 1;
+
+  /* ---------- normalise ---------- */
+  var items = RAW.map(function(r, i){
+    var d = parseDate(r.date);
+    if (!d || !r.title) return null;
+    var cat = CATS[r.category] ? r.category : "daily";
+    var who = [].concat(r.who || []).filter(function(id){ return BY_ID[id]; });
+    return {
+      i:i, date:d, title:String(r.title),
+      cat:cat, catColor:CATS[cat].color,
+      who:who,                       // 空陣列＝全家共同
+      shared: who.length === 0,
+      note:r.note || "", photos:[].concat(r.photos || []),
+      measures:r.measures || null, place:r.place || "",
+      people:[].concat(r.people || []), tags:[].concat(r.tags || []),
+      highlight: !!r.highlight
+    };
+  }).filter(Boolean);
+  var badCount = RAW.length - items.length;
+
+  // 這一筆跟誰有關（沒寫 who ＝ 全部）
+  function ids(m){ return m.shared ? ALL_IDS : m.who; }
+
+  /* ---------- state ---------- */
+  var view  = SITE.defaultView && (SITE.defaultView === "all" || BY_ID[SITE.defaultView])
+              ? SITE.defaultView : "all";
+  var hash  = (location.hash || "").replace(/^#/, "");
+  if (hash === "all" || BY_ID[hash]) view = hash;
+  if (!MULTI) view = ALL_IDS[0] || "all";
+
+  var active = null;                              // 分類篩選
+  var order  = (SITE.defaultOrder === "oldest") ? 1 : -1;
+
+  function curBaby(){ return view === "all" ? null : BY_ID[view]; }
+
+  /* ---------- header ---------- */
+  function paintHeader(){
+    var b = curBaby();
+    document.getElementById("name").textContent = b ? b.name : (SITE.title || "成長里程碑");
+    document.getElementById("sub").textContent  = b ? "" : (SITE.subtitle || "");
+    document.title = (b ? b.name + "的" : "") + (SITE.title || "成長里程碑");
+    document.documentElement.style.setProperty("--accent", b ? (b.accent || SITE.accent) : (SITE.accent || "#8C7B6E"));
+
+    var box = document.getElementById("ages");
+    box.innerHTML = "";
+    var today = new Date(); today.setHours(0,0,0,0);
+    var show = (b ? [b] : BABIES).filter(function(x){ return x.bd; });
+
+    // 雙胞胎同一天生日就併成一列，不要兩列一模一樣的年齡
+    var twins = show.length > 1 && show.every(function(x){ return +x.bd === +show[0].bd; });
+    if (twins){
+      var p = el("div","agepill");
+      p.appendChild(el("span","who", show.map(function(x){ return x.name; }).join("・")));
+      p.appendChild(el("b", null, ageText(show[0].bd, today)));
+      p.appendChild(el("span","bd","生日 " + fmtShort(show[0].bd)));
+      box.appendChild(p);
+      return;
+    }
+
+    show.forEach(function(x){
+      var p = el("div","agepill");
+      p.style.setProperty("--wc", x.accent || "var(--accent)");
+      if (!b && MULTI) p.appendChild(el("span","who",x.name));
+      p.appendChild(el("b", null, ageText(x.bd, today)));
+      p.appendChild(el("span","bd","生日 " + fmtShort(x.bd)));
+      box.appendChild(p);
+    });
+  }
+
+  /* ---------- 寶寶切換 ---------- */
+  function buildSwitch(){
+    if (!MULTI) return;
+    var box = document.getElementById("whoswitch");
+    box.hidden = false;
+    box.innerHTML = "";
+    function add(key, label, color){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(view === key));
+      if (color){ var i = el("i"); i.style.background = color; b.appendChild(i); }
+      b.appendChild(document.createTextNode(label));
+      b.addEventListener("click", function(){
+        if (view === key) return;
+        view = key;
+        if (history.replaceState) history.replaceState(null, "", "#" + key);
+        else location.hash = key;
+        buildSwitch(); paintHeader(); buildChips(); render(); drawGrowth();
+      });
+      box.appendChild(b);
+    }
+    add("all", "全部", null);
+    BABIES.forEach(function(x){ add(x.id, x.name, x.accent); });
+  }
+
+  window.addEventListener("hashchange", function(){
+    var h = (location.hash || "").replace(/^#/, "");
+    if ((h === "all" || BY_ID[h]) && h !== view){
+      view = h;
+      buildSwitch(); paintHeader(); buildChips(); render(); drawGrowth();
+    }
+  });
+
+  /* ---------- 篩選 ---------- */
+  function inView(m){ return view === "all" || ids(m).indexOf(view) >= 0; }
+
+  var chipBox = document.getElementById("chips");
+  function buildChips(){
+    chipBox.innerHTML = "";
+    var pool = items.filter(inView);
+    var counts = {};
+    pool.forEach(function(m){ counts[m.cat] = (counts[m.cat]||0)+1; });
+    var hlCount = pool.filter(function(m){ return m.highlight; }).length;
+
+    function add(key, label, color, n){
+      var b = el("button","chip");
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(active === key));
+      if (color){ var dot = el("span","dot"); dot.style.background = color; b.appendChild(dot); }
+      b.appendChild(document.createTextNode(label));
+      if (n != null) b.appendChild(el("span","n",String(n)));
+      b.addEventListener("click", function(){
+        active = (active === key) ? null : key;
+        buildChips(); render();
+      });
+      chipBox.appendChild(b);
+    }
+
+    add(null, "全部", null, pool.length);
+    if (hlCount) add("hl", "★ 重點", null, hlCount);
+    Object.keys(CATS).forEach(function(k){
+      if (counts[k]) add(k, CATS[k].label, CATS[k].color, counts[k]);
+    });
+  }
+
+  /* ---------- render ---------- */
+  var list = document.getElementById("list");
+
+  function visible(){
+    var rows = items.filter(function(m){
+      if (!inView(m)) return false;
+      if (active === null) return true;
+      if (active === "hl") return m.highlight;
+      return m.cat === active;
+    });
+    // 出生當作時間軸節點，跟著日期一起排（產檢這類出生前的紀錄才會排在下面）
+    if (active === null){
+      BABIES.forEach(function(x){
+        if (!x.bd) return;
+        if (view !== "all" && view !== x.id) return;
+        rows = rows.concat([{ isBirth:true, baby:x, date:x.bd, i:-1 }]);
+      });
+    }
+    return rows.sort(function(a,b){ return order * (a.date - b.date) || order * (a.i - b.i); });
+  }
+
+  // 這一筆該顯示哪些人的年齡：明確寫在 who 裡的一定顯示；
+  // 全家共同的事，只顯示當時已經出生的寶寶。
+  function ageChips(m){
+    var out = [];
+    // 看單一寶寶時只算他自己的年齡，才不會兩個數字並排卻分不出是誰
+    var pool = view === "all" ? ids(m) : [view];
+    pool.forEach(function(id){
+      var x = BY_ID[id];
+      if (!x || !x.bd) return;
+      if (m.shared && m.date < x.bd) return;
+      out.push({ baby:x, text:ageText(x.bd, m.date) });
+    });
+    return out;
+  }
+
+  function dotColor(m){
+    if (view !== "all") return m.catColor;          // 單一寶寶：顏色留給分類
+    if (m.who.length === 1) return BY_ID[m.who[0]].accent;
+    return null;                                    // 共同事件：用預設灰
+  }
+
+  function card(m){
+    var wrap = el("article", "item" + (m.highlight ? " hl" : ""));
+    var dc = dotColor(m);
+    if (dc) wrap.style.setProperty("--c", dc);
+    var c = el("div","card");
+
+    var top = el("div","top");
+    top.appendChild(el("span","date",fmtDate(m.date)));
+
+    var chips = ageChips(m);
+    var same = chips.length > 1 && chips.every(function(a){ return a.text === chips[0].text; });
+    if (same){
+      // 雙胞胎同一天生日，年齡完全一樣時併成一個，不要並排兩個相同數字
+      var s = el("span","age");
+      if (view === "all" && MULTI && !m.shared){
+        s.appendChild(el("b", null, chips.map(function(a){ return a.baby.name; }).join("・")));
+      }
+      s.appendChild(document.createTextNode(chips[0].text));
+      top.appendChild(s);
+    } else {
+      chips.forEach(function(a){
+        var s = el("span","age");
+        if (view === "all" && MULTI){
+          s.style.setProperty("--wc", a.baby.accent || "var(--ink-2)");
+          s.appendChild(el("b", null, a.baby.name));
+        }
+        s.appendChild(document.createTextNode(a.text));
+        top.appendChild(s);
+      });
+    }
+
+    if (view === "all" && MULTI && m.shared){
+      var fam = el("span","age");
+      fam.appendChild(el("b", null, "全家"));
+      top.appendChild(fam);
+    }
+
+    var cat = el("span","cat");
+    cat.style.setProperty("--cc", m.catColor);
+    cat.appendChild(el("i"));
+    cat.appendChild(document.createTextNode(CATS[m.cat].label));
+    top.appendChild(cat);
+    c.appendChild(top);
+
+    c.appendChild(el("h3", null, m.title));
+    if (m.note) c.appendChild(el("p","note",m.note));
+
+    if (m.measures){
+      var ms = el("div","ms");
+      [["height","身高","cm"],["weight","體重","kg"],["head","頭圍","cm"]].forEach(function(f){
+        var v = m.measures[f[0]];
+        if (v == null || v === "") return;
+        var b = el("b");
+        b.appendChild(el("em", null, f[1]));
+        b.appendChild(document.createTextNode(v + " " + f[2]));
+        ms.appendChild(b);
+      });
+      if (ms.children.length) c.appendChild(ms);
+    }
+
+    if (m.photos.length){
+      var g = el("div", "shots" + (m.photos.length === 1 ? " one" : ""));
+      m.photos.forEach(function(src){
+        var img = new Image();
+        img.src = src; img.alt = m.title; img.loading = "lazy"; img.decoding = "async";
+        img.addEventListener("click", function(){ openLb(src, m.title); });
+        img.addEventListener("error", function(){ img.remove(); });
+        g.appendChild(img);
+      });
+      c.appendChild(g);
+    }
+
+    var foot = el("div","foot");
+    if (m.place) foot.appendChild(el("span","tag where",m.place));
+    m.people.forEach(function(p){ foot.appendChild(el("span","tag who2",p)); });
+    m.tags.forEach(function(t){ foot.appendChild(el("span","tag",t)); });
+    if (foot.children.length) c.appendChild(foot);
+
+    wrap.appendChild(c);
+    return wrap;
+  }
+
+  function birthNode(m){
+    var wrap = el("div","birth");
+    wrap.style.setProperty("--c", m.baby.accent || "var(--accent)");
+    var c = el("div","card");
+    var top = el("div","top");
+    top.appendChild(el("span","date",fmtDate(m.date)));
+    c.appendChild(top);
+    c.appendChild(el("h3", null, (MULTI && view === "all" ? m.baby.name + " " : "") + "出生 🍼"));
+    wrap.appendChild(c);
+    return wrap;
+  }
+
+  function render(){
+    var rows = visible();
+    list.innerHTML = "";
+    var n = rows.filter(function(m){ return !m.isBirth; }).length;
+    document.getElementById("count").textContent =
+      n + " 則" + (badCount ? "（" + badCount + " 筆格式有誤已略過）" : "");
+
+    if (!n && !rows.length){
+      list.appendChild(el("div","empty","這裡還沒有紀錄。"));
+      return;
+    }
+
+    var tl = null, curYear = null;
+    rows.forEach(function(m){
+      var y = m.date.getFullYear();
+      if (y !== curYear){
+        curYear = y;
+        var h = el("div","year");
+        h.appendChild(el("span", null, y + " 年"));
+        list.appendChild(h);
+        tl = el("div","tl");
+        list.appendChild(tl);
+      }
+      tl.appendChild(m.isBirth ? birthNode(m) : card(m));
+    });
+  }
+
+  /* ---------- 生長曲線 ---------- */
+  // 量測只算 who 剛好一個人的紀錄（不然不知道數字是誰的）
+  function seriesFor(baby, key){
+    if (!baby.bd) return [];
+    return items
+      .filter(function(m){
+        return m.measures && m.who.length === 1 && m.who[0] === baby.id
+          && m.measures[key] != null && m.measures[key] !== "";
+      })
+      .map(function(m){
+        var t = diff(baby.bd, m.date);
+        return { x: t.months + t.d/30, v: +m.measures[key], d: m.date };
+      })
+      .filter(function(p){ return !isNaN(p.v) && p.x >= 0; })
+      .sort(function(a,b){ return a.x - b.x; });
+  }
+
+  function drawGrowth(){
+    var box = document.getElementById("growth");
+    box.innerHTML = ""; box.hidden = true;
+
+    var b = curBaby();
+    var who = b ? [b] : BABIES;
+    var specs = [{ key:"height", label:"身高", unit:"cm" }, { key:"weight", label:"體重", unit:"kg" }];
+    var charts = el("div","charts");
+    var any = false;
+
+    specs.forEach(function(sp){
+      var sets = who.map(function(x){ return { baby:x, pts:seriesFor(x, sp.key) }; })
+                    .filter(function(s){ return s.pts.length >= 2; });
+      if (!sets.length) return;
+      any = true;
+
+      var W = 260, H = 96, pad = 6;
+      var xs = [], vs = [];
+      sets.forEach(function(s){ s.pts.forEach(function(p){ xs.push(p.x); vs.push(p.v); }); });
+      var x0 = Math.min.apply(null,xs), x1 = Math.max.apply(null,xs);
+      var v0 = Math.min.apply(null,vs), v1 = Math.max.apply(null,vs);
+      if (x1 === x0) x1 = x0 + 1;
+      if (v1 === v0) v1 = v0 + 1;
+      var sx = function(x){ return pad + (x-x0)/(x1-x0)*(W-pad*2); };
+      var sy = function(v){ return H - pad - (v-v0)/(v1-v0)*(H-pad*2); };
+
+      var ch = el("div","chart");
+      var ct = el("div","ct");
+      ct.appendChild(el("h4", null, sp.label));
+      if (sets.length === 1){
+        var lastP = sets[0].pts[sets[0].pts.length-1];
+        var sv = el("span", null, lastP.v + " " + sp.unit);
+        sv.style.color = sets[0].baby.accent || "var(--accent)";
+        ct.appendChild(sv);
+      }
+      ch.appendChild(ct);
+
+      if (sets.length > 1){
+        var lg = el("div","lg");
+        sets.forEach(function(s){
+          var w = el("span");
+          var i = el("i"); i.style.background = s.baby.accent || "var(--accent)";
+          w.appendChild(i);
+          w.appendChild(document.createTextNode(s.baby.name + " "));
+          w.appendChild(el("b", null, s.pts[s.pts.length-1].v + " " + sp.unit));
+          lg.appendChild(w);
+        });
+        ch.appendChild(lg);
+      }
+
+      var NS = "http://www.w3.org/2000/svg";
+      var svg = document.createElementNS(NS,"svg");
+      svg.setAttribute("viewBox","0 0 " + W + " " + H);
+      svg.setAttribute("preserveAspectRatio","none");
+
+      sets.forEach(function(s){
+        var col = s.baby.accent || "#E08A6E";
+        var pts = s.pts;
+
+        if (sets.length === 1){
+          var area = document.createElementNS(NS,"polygon");
+          area.setAttribute("points",
+            pts.map(function(p){ return sx(p.x)+","+sy(p.v); }).join(" ") +
+            " " + sx(pts[pts.length-1].x) + "," + H + " " + sx(pts[0].x) + "," + H);
+          area.setAttribute("fill", col);
+          area.setAttribute("opacity",".10");
+          svg.appendChild(area);
+        }
+
+        var line = document.createElementNS(NS,"polyline");
+        line.setAttribute("points", pts.map(function(p){ return sx(p.x)+","+sy(p.v); }).join(" "));
+        line.setAttribute("fill","none");
+        line.setAttribute("stroke", col);
+        line.setAttribute("stroke-width","2");
+        line.setAttribute("stroke-linejoin","round");
+        line.setAttribute("stroke-linecap","round");
+        line.setAttribute("vector-effect","non-scaling-stroke");
+        svg.appendChild(line);
+
+        pts.forEach(function(p){
+          var c = document.createElementNS(NS,"circle");
+          c.setAttribute("cx",sx(p.x)); c.setAttribute("cy",sy(p.v)); c.setAttribute("r","2.6");
+          c.setAttribute("fill","var(--surface)");
+          c.setAttribute("stroke", col);
+          c.setAttribute("stroke-width","1.8");
+          c.setAttribute("vector-effect","non-scaling-stroke");
+          var t = document.createElementNS(NS,"title");
+          t.textContent = s.baby.name + "　" + fmtDate(p.d) + "　" + p.v + " " + sp.unit;
+          c.appendChild(t);
+          svg.appendChild(c);
+        });
+      });
+      ch.appendChild(svg);
+
+      var xl = el("div","xl");
+      xl.appendChild(el("span", null, Math.round(x0) + " 個月"));
+      xl.appendChild(el("span", null, Math.round(x1) + " 個月"));
+      ch.appendChild(xl);
+      charts.appendChild(ch);
+    });
+
+    if (!any) return;
+    box.appendChild(el("h2", null, "生長紀錄"));
+    box.appendChild(el("p","hint",
+      (who.length > 1 ? "橫軸是月齡，兩個人疊在一起就能比同月齡的差別。" : "橫軸是月齡。") +
+      "點圓點看當次數值。"));
+    box.appendChild(charts);
+    box.hidden = false;
+  }
+
+  /* ---------- lightbox ---------- */
+  var lb = document.getElementById("lb");
+  function openLb(src, alt){
+    var img = lb.querySelector("img");
+    img.src = src; img.alt = alt || "";
+    lb.classList.add("on");
+    document.body.style.overflow = "hidden";
+  }
+  function closeLb(){
+    lb.classList.remove("on");
+    lb.querySelector("img").src = "";
+    document.body.style.overflow = "";
+  }
+  lb.addEventListener("click", closeLb);
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeLb(); });
+
+  /* ---------- sort ---------- */
+  document.getElementById("sort").addEventListener("click", function(){
+    order = -order;
+    document.getElementById("sortlabel").textContent = order === -1 ? "新的在上" : "舊的在上";
+    render();
+  });
+  document.getElementById("sortlabel").textContent = order === -1 ? "新的在上" : "舊的在上";
+
+  /* ---------- 手機吸頂分隔線 ---------- */
+  var ctl = document.getElementById("controls");
+  var sentinel = el("div");
+  ctl.parentNode.insertBefore(sentinel, ctl);
+  if (window.IntersectionObserver){
+    new IntersectionObserver(function(e){
+      ctl.classList.toggle("stuck", !e[0].isIntersecting);
+    }).observe(sentinel);
+  }
+
+  /* ---------- footer ---------- */
+  var last = items.reduce(function(a,m){ return (!a || m.date > a) ? m.date : a; }, null);
+  document.getElementById("updated").textContent =
+    last ? "最後一筆紀錄：" + fmtDate(last) : "還沒有任何紀錄";
+
+  buildSwitch();
+  paintHeader();
+  buildChips();
+  render();
+  drawGrowth();
+})();
+</script>
+</body>
+</html>
