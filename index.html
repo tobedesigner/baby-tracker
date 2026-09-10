@@ -143,6 +143,8 @@ h1{margin:0;font-size:32px;line-height:1.25;font-weight:700;letter-spacing:.01em
   background:var(--bg);border:3px solid var(--c,var(--rail));box-shadow:0 0 0 4px var(--bg);
 }
 .item.hl::before{background:var(--c,var(--accent))}
+/* 跨天的事在時間軸上畫成一小段，不是一個點 */
+.item.range::before{height:30px;border-radius:7px;top:18px}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px;box-shadow:var(--shadow)}
 .item.hl .card{border-color:color-mix(in srgb, var(--c,var(--accent)) 45%, var(--line))}
@@ -150,6 +152,7 @@ h1{margin:0;font-size:32px;line-height:1.25;font-weight:700;letter-spacing:.01em
 .card .date{font-variant-numeric:tabular-nums;color:var(--ink-2);font-weight:500}
 .card .age{color:var(--muted)}
 .card .age b{color:var(--wc,var(--ink-2));font-weight:600;margin-right:3px}
+.card .dur{color:var(--muted);background:var(--surface-2);border-radius:5px;padding:1px 7px;font-size:11.5px}
 .card .cat{margin-left:auto;display:inline-flex;align-items:center;gap:5px;color:var(--cc,var(--muted));font-size:12px;white-space:nowrap}
 .card .cat i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
 .card h3{margin:0;font-size:18px;line-height:1.45;font-weight:650;letter-spacing:.01em}
@@ -337,6 +340,16 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--muted);line-
     return d.getFullYear() + "/" + String(d.getMonth()+1).padStart(2,"0")
          + "/" + String(d.getDate()).padStart(2,"0");
   }
+  // 跨天的事：同年就只寫結束的月日，省得一長串
+  function fmtRange(d, e){
+    if (!e) return fmtDate(d);
+    var wd = ["日","一","二","三","四","五","六"][e.getDay()];
+    var tail = (d.getFullYear() === e.getFullYear() ? "" : e.getFullYear() + "/")
+             + String(e.getMonth()+1).padStart(2,"0") + "/"
+             + String(e.getDate()).padStart(2,"0") + "（" + wd + "）";
+    return fmtDate(d) + " ～ " + tail;
+  }
+  function spanDays(d, e){ return Math.round((e - d) / 86400000) + 1; }
   function diff(b, d){
     var sign = d < b ? -1 : 1;
     var a = sign > 0 ? b : d, z = sign > 0 ? d : b;
@@ -368,10 +381,11 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--muted);line-
   var items = RAW.map(function(r, i){
     var d = parseDate(r.date);
     if (!d || !r.title) return null;
+    var e = parseDate(r.endDate);
     var cat = CATS[r.category] ? r.category : "daily";
     var who = [].concat(r.who || []).filter(function(id){ return BY_ID[id]; });
     return {
-      i:i, date:d, title:String(r.title),
+      i:i, date:d, end:(e && e > d) ? e : null, title:String(r.title),
       cat:cat, catColor:CATS[cat].color,
       who:who,                       // 空陣列＝全家共同
       shared: who.length === 0,
@@ -540,13 +554,14 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--muted);line-
   }
 
   function card(m){
-    var wrap = el("article", "item" + (m.highlight ? " hl" : ""));
+    var wrap = el("article", "item" + (m.highlight ? " hl" : "") + (m.end ? " range" : ""));
     var dc = dotColor(m);
     if (dc) wrap.style.setProperty("--c", dc);
     var c = el("div","card");
 
     var top = el("div","top");
-    top.appendChild(el("span","date",fmtDate(m.date)));
+    top.appendChild(el("span","date",fmtRange(m.date, m.end)));
+    if (m.end) top.appendChild(el("span","dur","共 " + spanDays(m.date, m.end) + " 天"));
 
     var chips = ageChips(m);
     var same = chips.length > 1 && chips.every(function(a){ return a.text === chips[0].text; });
@@ -822,7 +837,10 @@ footer{margin-top:40px;text-align:center;font-size:12px;color:var(--muted);line-
   }
 
   /* ---------- footer ---------- */
-  var last = items.reduce(function(a,m){ return (!a || m.date > a) ? m.date : a; }, null);
+  var last = items.reduce(function(a,m){
+    var d = m.end || m.date;
+    return (!a || d > a) ? d : a;
+  }, null);
   document.getElementById("updated").textContent =
     last ? "最後一筆紀錄：" + fmtDate(last) : "還沒有任何紀錄";
 
