@@ -38,6 +38,15 @@ import type { MilestoneInput } from "../types";
 
 export const MILESTONES: MilestoneInput[] = [
   {
+    date: "2026-09-25",
+    title: "第一次體驗中秋節活動",
+    who: ["uwa", "una"],
+    category: "holiday",
+    place: "松林",
+    tags: ["中秋節"],
+    highlight: true,
+  },
+  {
     date: "2026-09-13",
     endDate: "2026-09-21",
     title: "第一次感冒發燒",
