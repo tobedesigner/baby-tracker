@@ -30,6 +30,12 @@
 .card .cat i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
 .card h3{margin:0;font-size:18px;line-height:1.45;font-weight:650;letter-spacing:.01em}
 .card .note{margin:8px 0 0;color:var(--ink-2);font-size:14.5px;white-space:pre-line}
+.card .memo{
+  margin:10px 0 0;padding:7px 12px;
+  border-left:3px solid var(--c,var(--accent));
+  background:var(--surface-2);border-radius:0 8px 8px 0;
+  color:var(--ink-2);font-size:13.5px;line-height:1.65;white-space:pre-line;
+}
 .card .foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;align-items:center}
 .tag{font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border-radius:6px;padding:2.5px 8px}
 .tag.where::before{content:"📍 "}

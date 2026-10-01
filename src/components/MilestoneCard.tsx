@@ -86,6 +86,7 @@ export function MilestoneCard({ m, view, multi, byId, allIds, onOpenPhoto }: Pro
 
         <h3>{m.title}</h3>
         {m.note && <p className="note">{m.note}</p>}
+        {m.memo && <p className="memo">{m.memo}</p>}
 
         {measures.length > 0 && (
           <div className="ms">

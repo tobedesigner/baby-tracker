@@ -54,6 +54,7 @@ export function normalizeMilestones(
         who, // 空陣列＝全家共同
         shared: who.length === 0,
         note: r.note ?? "",
+        memo: r.memo ?? "",
         photos: r.photos ?? [],
         measures: r.measures ?? null,
         place: r.place ?? "",

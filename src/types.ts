@@ -30,6 +30,8 @@ export interface MilestoneInput {
   category?: CategoryKey;
   /** 補充說明，\n 可換行 */
   note?: string;
+  /** 備註：當下的心情、事後想說的話；跟 note 的事件描述分開顯示 */
+  memo?: string;
   /** 路徑從 public/ 算起，例如 "assets/photos/a.jpg" */
   photos?: string[];
   /** 量測請一筆一人（who 只寫一個），不然不知道數字是誰的 */
@@ -79,6 +81,7 @@ export interface Milestone {
   /** who 是空的＝全家共同 */
   shared: boolean;
   note: string;
+  memo: string;
   photos: string[];
   measures: Measures | null;
   place: string;

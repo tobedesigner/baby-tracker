@@ -78,6 +78,7 @@ git push
 | `who` | `["uwa"]` | 是誰的事，對應 `babies.js` 的 id；不寫＝全家共同 |
 | `category` | `"care"` | 決定顏色與篩選鈕，見下表；沒寫歸到「日常」 |
 | `note` | `"第一天只哭了五分鐘"` | 補充說明，`\n` 可換行 |
+| `memo` | `"心疼"` | 備註：當下的心情或想說的話，顯示成左邊帶色條的便條 |
 | `photos` | `["assets/photos/a.jpg"]` | 可多張，路徑從 `public/` 算起 |
 | `measures` | `{ height: 62.5, weight: 6.8, head: 41.2 }` | 身高/體重/頭圍（公分、公斤） |
 | `place` | `"台北"` | 地點 |

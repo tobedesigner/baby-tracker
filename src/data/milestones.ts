@@ -16,6 +16,7 @@ import type { MilestoneInput } from "../types";
                     不寫              全家共同的事，兩個寶寶的頁面都看得到
    category   選填  見下方分類表        決定顏色與篩選鈕，沒寫就歸到「日常」
    note       選填  "第一天只哭了五分鐘" 補充說明，可以寫多行（用 \n 換行）
+   memo       選填  "心疼"            備註：當下的心情、事後想說的話，顯示成帶色條的便條
    photos     選填  ["assets/photos/2026-09-09.jpg"]  可放多張，路徑從 public/ 算起
    measures   選填  { height: 62.5, weight: 6.8, head: 41.2 }
                     身高/體重/頭圍，單位是公分與公斤。有兩筆以上就會自動畫成長曲線。
@@ -42,6 +43,7 @@ export const MILESTONES: MilestoneInput[] = [
     title: "吐奶吐在阿公阿嬤的床上",
     who: ["una"],
     category: "daily",
+    memo: "心疼",
     tags: ["吐奶"],
   },
   {
