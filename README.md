@@ -26,6 +26,16 @@ React + TypeScript + Vite，推上 main 之後 GitHub Actions 會自動 build �
 
 **雙胞胎特別處理**：兩人生日同一天時，年齡完全一樣的地方會自動併成一列（顯示「予安・予樂 7 個月又 3 天」），不會並排兩個一模一樣的數字。只跟其中一個有關的事照樣單獨顯示。
 
+## 找紀錄
+
+篩選列有三種方式，可以疊著用，筆數會跟著縮：
+
+- **分類 chip**：第一次、健康、出遊這些，再點一次取消；「★ 重點」只看標成 `highlight` 的。
+- **標籤**：點卡片底下的標籤（例如「感冒」），只看同標籤的紀錄，篩選列最前面會出現一顆可取消的 chip。
+- **搜尋**：點「搜尋」展開輸入框，比對標題、說明、備註、地點、在場的人與標籤。
+
+這些條件只留在畫面上、不進網址。切換看誰時會保留，但在新範圍裡一筆都沒有的會自動取消。
+
 ## 加一筆里程碑
 
 打開 `src/data/milestones.ts`，在陣列裡加一段：
@@ -63,8 +73,10 @@ git push
 打包出來的 JS 與 CSS 檔名帶內容雜湊，改了什麼就換一個檔名，所以**部署完重新整理就看得到**。
 只有 `index.html` 本身可能還停在瀏覽器快取，那按一次 Ctrl+Shift+R。
 
-欄位打錯會在編輯器直接紅字（型別定義在 `src/types.ts`），漏了 `date` 或 `title` 的那一筆會被跳過，
-筆數旁邊會標「N 筆格式有誤已略過」。
+欄位打錯會在編輯器直接紅字（型別定義在 `src/types.ts`）。推上去前可以先跑 `npm run check`，
+它會抓日期不存在、`who` 不是寶寶 id、分類打錯、結束日早於開始日、照片檔不存在這些網頁上看不出來的錯；
+Actions 在 build 前也會跑同一支，有錯就不會發佈，線上維持前一版。
+漏了 `date` 或 `title`、或 `who` 的 id 全部打錯的那一筆會被網頁跳過，筆數旁邊會標「N 筆格式有誤已略過」。
 
 ## 欄位
 
@@ -79,11 +91,11 @@ git push
 | `category` | `"care"` | 決定顏色與篩選鈕，見下表；沒寫歸到「日常」 |
 | `note` | `"第一天只哭了五分鐘"` | 補充說明，`\n` 可換行 |
 | `memo` | `"心疼"` | 備註：當下的心情或想說的話，顯示成左邊帶色條的便條 |
-| `photos` | `["assets/photos/a.jpg"]` | 可多張，路徑從 `public/` 算起 |
+| `photos` | `["assets/photos/2026-09-09-first-day.webp"]` | 可多張，路徑從 `public/` 算起；用 `npm run photos` 產生，見下方「照片」 |
 | `measures` | `{ height: 62.5, weight: 6.8, head: 41.2 }` | 身高/體重/頭圍（公分、公斤） |
 | `place` | `"台北"` | 地點 |
 | `people` | `["爸爸", "媽媽"]` | 當天在場的大人 |
-| `tags` | `["公托", "適應期"]` | 自由標籤 |
+| `tags` | `["公托", "適應期"]` | 自由標籤，點了只看同標籤的紀錄 |
 | `highlight` | `true` | 標成重點，卡片加強調並排進「重點」篩選 |
 
 分類 `category`：
@@ -106,6 +118,8 @@ git push
 
 **量測請一筆一人**：`measures` 只算 `who` 剛好寫一個人的紀錄，寫兩個人或不寫的不會進圖，不然不知道數字是誰的。
 
+點一下圓點會顯示那次的日期與數值，再點一下收起。
+
 ## 基本設定
 
 - `src/data/babies.ts`：兩個寶寶的 id、名字、生日、代表色。加第三個就多一筆，切換鈕會自動多一個。
@@ -117,10 +131,21 @@ git push
 
 ## 照片
 
-放到 `public/assets/photos/`，檔名建議用日期開頭（`2026-09-09-first-day.jpg`）方便對照。
-`public/` 底下的東西會原樣複製到網站根目錄，所以資料裡照樣寫 `assets/photos/2026-09-09-first-day.jpg`。
-上傳前先縮到長邊 1600px 以內，手機開起來才快。
-找不到的圖片會自動隱藏，不會出現破圖。
+原圖丟進專案根目錄的 `photos/`（jpg、png、webp、heic 都可以），然後跑：
+
+```
+npm run photos
+```
+
+會在 `public/assets/photos/` 產生長邊 1600px 的 WebP 加一張長邊 800px 的縮圖，依 EXIF 轉正、去掉 EXIF 與 GPS 位置，
+檔名沒有日期開頭的會用拍攝日期補上，最後印出可以直接貼進 `milestones.ts` 的 `photos` 寫法。
+`photos/` 不進 git，原圖留在手機或雲端備份就好；網站只放縮過的版本。
+
+資料裡填 `assets/photos/<名稱>.webp` 就好，卡片會自動先載縮圖、點開才載大圖。
+手動放進 `public/assets/photos/` 的圖也能用，只是沒有縮圖時手機會下載整張。
+找不到的圖片會自動隱藏，不會出現破圖；`npm run check` 會把路徑打錯的那筆列出來。
+
+iPhone 的 HEIC 解不開的話，先在「設定 → 相機 → 格式」選「最相容」，或匯出成 JPG 再放進來。
 
 ## 發佈到 GitHub Pages
 
@@ -137,7 +162,7 @@ git push
 4. 第一次部署約兩三分鐘，網址是 `https://<帳號>.github.io/<repo>/`。
 
 之後每次 `git push` 到 main，`.github/workflows/deploy.yml` 就會自動 build 並發佈，不需要再進設定。
-build 前會先跑型別檢查，型別有錯就不會發佈，線上維持前一版。
+build 前會先跑測試、型別檢查與資料檢查，任何一項有錯就不會發佈，線上維持前一版。
 
 ## 幾件事先知道
 
@@ -147,17 +172,21 @@ build 前會先跑型別檢查，型別有錯就不會發佈，線上維持前�
 
 ## 本機開發
 
-需要 Node.js 20 以上。
+需要 Node.js 22.18 以上（資料檢查與照片腳本直接用 Node 跑 .ts，不經過 Vite）。
 
 ```
 npm install       只有第一次要跑
 npm run dev       開發伺服器，改檔案畫面即時更新
+npm run check     檢查資料有沒有打錯，推上去前跑這個就夠
+npm run photos    把 photos/ 的原圖縮成網頁用的版本
+npm test          單元測試：日期、年齡、篩選的邏輯
 npm run typecheck 只做型別檢查
-npm run build     產出 dist/（平常交給 Actions 跑就好）
+npm run format    用 prettier 整理程式碼
+npm run build     型別檢查 + 資料檢查 + 產出 dist/（平常交給 Actions 跑就好）
 npm run preview   預覽 build 出來的結果
 ```
 
-只是要加一筆里程碑的話，這些都不用跑：改 `src/data/milestones.ts` 然後 push 就好。
+只是要加一筆里程碑的話，這些都不用跑：改 `src/data/milestones.ts` 然後 push 就好，頂多先跑一下 `npm run check`。
 
 ## 檔案結構
 
@@ -174,15 +203,16 @@ src/data/milestones.ts        里程碑資料（兩個寶寶共用一份）
 src/lib/date.ts               日期格式與年齡計算
 src/lib/categories.ts         分類的名稱與顏色
 src/lib/milestones.ts         資料正規化、篩選排序、生長曲線取點
-src/lib/asset.ts              照片路徑補上部署 base
+src/lib/asset.ts              照片路徑補上部署 base、縮圖檔名慣例
 src/lib/useHashView.ts        看誰的狀態與網址 hash 同步
 src/lib/useStuck.ts           手機版篩選列吸頂偵測
 src/lib/useWidth.ts           量容器寬度，生長曲線用它讓圓點保持正圓
+src/lib/*.test.ts             單元測試（vitest）
 
 src/components/Sidebar.tsx    左欄：標題、寶寶切換、年齡、篩選
 src/components/WhoSwitch.tsx  全部／予安／予樂
 src/components/AgePills.tsx   現在幾歲（雙胞胎會併成一列）
-src/components/Controls.tsx   分類篩選、筆數、排序切換
+src/components/Controls.tsx   分類篩選、標籤、搜尋、筆數、排序切換
 src/components/Timeline.tsx   依年份分段的時間軸
 src/components/MilestoneCard.tsx  一筆里程碑的卡片
 src/components/BirthCard.tsx  出生節點
@@ -190,7 +220,11 @@ src/components/GrowthCharts.tsx   生長曲線（SVG，沒有圖表套件）
 src/components/Lightbox.tsx   照片放大，多張可左右切換、鍵盤可操作
 
 src/styles/                   樣式，index.css 匯入其餘五個
-public/assets/photos/         照片
+scripts/check-data.ts         資料檢查，npm run check
+scripts/photos.ts             照片縮圖，npm run photos
+photos/                       照片原圖，不進 git
+public/assets/photos/         縮好的照片
 public/robots.txt             擋搜尋引擎
-.github/workflows/deploy.yml  push 到 main 就自動 build 並發佈
+docs/ROADMAP.md               後續規劃
+.github/workflows/deploy.yml  push 到 main 就自動測試、檢查、build 並發佈
 ```
