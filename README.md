@@ -36,6 +36,23 @@ React + TypeScript + Vite，推上 main 之後 GitHub Actions 會自動 build �
 
 這些條件只留在畫面上、不進網址。切換看誰時會保留，但在新範圍裡一筆都沒有的會自動取消。
 
+時間軸依月份加了小標，篩選列的「跳到月份」可以直接跳過去；捲遠了右下角會出現回到最上面的按鈕。
+
+## 分享單筆
+
+每張卡片右上角有個連結圖示，點了就把這筆的網址複製到剪貼簿，貼到 LINE 給家人，開起來會直接捲到那筆並亮一下。
+網址長這樣：`.../?m=2026-10-16-dh4zh#uwa`，後面的 `#uwa` 是當時看誰，看「全部」就沒有。
+
+代號沒寫 `id` 就用日期加標題與人算出來，所以**改了標題或 who，舊連結就會失效**；想固定的那幾筆加 `id: "rsv"` 就好，`npm run check` 會擋重複的代號。
+
+## 發展里程碑清單
+
+時間軸下面有一份清單：翻身、坐、爬、長牙、走路這些常見項目，每項標常見月齡，雙寶各一格。
+記錄到了就在那筆里程碑加 `milestone: "rollOver"`，清單會打勾並顯示達成時的年齡，點了跳到那筆；
+今天的月齡落在常見範圍裡、還沒記錄的會標「差不多是時候」。
+項目與代號在 `src/data/checklist.ts`，想加項目直接在陣列多一筆。月齡只是參考，早一點晚一點都正常。
+
+
 ## 加一筆里程碑
 
 打開 `src/data/milestones.ts`，在陣列裡加一段：
@@ -97,6 +114,8 @@ Actions 在 build 前也會跑同一支，有錯就不會發佈，線上維持�
 | `people` | `["爸爸", "媽媽"]` | 當天在場的大人 |
 | `tags` | `["公托", "適應期"]` | 自由標籤，點了只看同標籤的紀錄 |
 | `highlight` | `true` | 標成重點，卡片加強調並排進「重點」篩選 |
+| `id` | `"rsv"` | 分享連結用的固定代號，不寫就自動算；見「分享單筆」 |
+| `milestone` | `"rollOver"` | 對應發展里程碑清單的代號，清單會打勾；代號在 `src/data/checklist.ts` |
 
 分類 `category`：
 
@@ -124,6 +143,8 @@ Actions 在 build 前也會跑同一支，有錯就不會發佈，線上維持�
 
 - `src/data/babies.ts`：兩個寶寶的 id、名字、生日、代表色。加第三個就多一筆，切換鈕會自動多一個。
 - `src/data/site.ts`：站名、副標、「全部」檢視的主色、預設排序與預設檢視。
+- `src/data/checklist.ts`：發展里程碑清單的項目與常見月齡。
+- `.env`：正式網址，分享到 LINE 的預覽圖要用絕對網址。搬到別的主機時改這裡。
 
 `id` 是給程式和網址用的，取短一點的英文，**設定之後不要再改**（改了舊網址會失效）。
 
@@ -146,6 +167,12 @@ npm run photos
 找不到的圖片會自動隱藏，不會出現破圖；`npm run check` 會把路徑打錯的那筆列出來。
 
 iPhone 的 HEIC 解不開的話，先在「設定 → 相機 → 格式」選「最相容」，或匯出成 JPG 再放進來。
+
+## 加到手機桌面
+
+用手機瀏覽器開網站，選「加入主畫面」，就會像 app 一樣有自己的圖示、沒有瀏覽器的網址列。
+圖示是兩個寶寶代表色的圓疊在一起，由 `npm run icons` 從 `site.ts` 與 `babies.ts` 產生；改了站名或代表色就重跑一次，產物在 `public/icons/`、`public/og.png`、`public/manifest.webmanifest`。
+把網址貼到 LINE 時會顯示預覽圖，用的是同一組圖。
 
 ## 發佈到 GitHub Pages
 
@@ -179,6 +206,7 @@ npm install       只有第一次要跑
 npm run dev       開發伺服器，改檔案畫面即時更新
 npm run check     檢查資料有沒有打錯，推上去前跑這個就夠
 npm run photos    把 photos/ 的原圖縮成網頁用的版本
+npm run icons     站名或代表色改了之後重新產生 app 圖示與分享預覽圖
 npm test          單元測試：日期、年齡、篩選的邏輯
 npm run typecheck 只做型別檢查
 npm run format    用 prettier 整理程式碼
@@ -199,6 +227,7 @@ src/types.ts                  資料欄位型別，改欄位從這裡開始
 src/data/site.ts              站名、副標、主色、預設值
 src/data/babies.ts            寶寶名單（id / 名字 / 生日 / 代表色）
 src/data/milestones.ts        里程碑資料（兩個寶寶共用一份）
+src/data/checklist.ts         發展里程碑清單的項目與常見月齡
 
 src/lib/date.ts               日期格式與年齡計算
 src/lib/categories.ts         分類的名稱與顏色
@@ -207,23 +236,31 @@ src/lib/asset.ts              照片路徑補上部署 base、縮圖檔名慣例
 src/lib/useHashView.ts        看誰的狀態與網址 hash 同步
 src/lib/useStuck.ts           手機版篩選列吸頂偵測
 src/lib/useWidth.ts           量容器寬度，生長曲線用它讓圓點保持正圓
+src/lib/id.ts                 分享連結的代號
+src/lib/permalink.ts          讀寫 ?m= 與複製到剪貼簿
+src/lib/checklist.ts          清單對每個寶寶的狀態
 src/lib/*.test.ts             單元測試（vitest）
 
 src/components/Sidebar.tsx    左欄：標題、寶寶切換、年齡、篩選
 src/components/WhoSwitch.tsx  全部／予安／予樂
-src/components/AgePills.tsx   現在幾歲（雙胞胎會併成一列）
+src/components/AgePills.tsx   現在幾歲與生日倒數（雙胞胎會併成一列）
 src/components/Controls.tsx   分類篩選、標籤、搜尋、筆數、排序切換
 src/components/Timeline.tsx   依年份分段的時間軸
 src/components/MilestoneCard.tsx  一筆里程碑的卡片
 src/components/BirthCard.tsx  出生節點
 src/components/GrowthCharts.tsx   生長曲線（SVG，沒有圖表套件）
 src/components/Lightbox.tsx   照片放大，多張可左右切換、鍵盤可操作
+src/components/Checklist.tsx  發展里程碑清單
+src/components/BackToTop.tsx  回到最上面
 
-src/styles/                   樣式，index.css 匯入其餘五個
+src/styles/                   樣式，index.css 匯入其餘六個
 scripts/check-data.ts         資料檢查，npm run check
 scripts/photos.ts             照片縮圖，npm run photos
+scripts/icons.ts              app 圖示、分享預覽圖與 manifest，npm run icons
 photos/                       照片原圖，不進 git
 public/assets/photos/         縮好的照片
+public/icons/ og.png manifest.webmanifest  npm run icons 的產物
+.env                          正式網址，分享預覽圖用
 public/robots.txt             擋搜尋引擎
 docs/ROADMAP.md               後續規劃
 .github/workflows/deploy.yml  push 到 main 就自動測試、檢查、build 並發佈
