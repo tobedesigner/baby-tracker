@@ -2,11 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Baby, SiteConfig, View } from "../types";
 
 /** 網址沒帶 hash 時要看誰：site.ts 的 defaultView；只有一個寶寶就直接看他 */
-export function defaultView(
-  site: SiteConfig,
-  byId: Record<string, Baby>,
-  allIds: string[],
-): View {
+export function defaultView(site: SiteConfig, byId: Record<string, Baby>, allIds: string[]): View {
   // 只有一個寶寶就不必有「全部」
   if (allIds.length <= 1) return allIds[0] ?? "all";
   return site.defaultView && (site.defaultView === "all" || byId[site.defaultView])

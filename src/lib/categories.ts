@@ -1,6 +1,7 @@
 import type { CategoryKey } from "../types";
 
 /** 分類的顯示名稱與顏色。改顏色改這裡就好，篩選鈕與卡片會一起換。 */
+// prettier-ignore
 export const CATS: Record<CategoryKey, { label: string; color: string }> = {
   first:   { label: "第一次", color: "#E4785F" },
   growth:  { label: "成長",   color: "#7FA46F" },

@@ -34,7 +34,8 @@ const ids = new Set<string>();
 BABIES.forEach((b, i) => {
   const who = b.name || b.id || `babies[${i}]`;
   if (!b.id) errors.push(`${who}：沒有 id`);
-  else if (!/^[a-z0-9-]+$/.test(b.id)) errors.push(`${who}：id「${b.id}」只能用小寫英數與 -，它會進網址`);
+  else if (!/^[a-z0-9-]+$/.test(b.id))
+    errors.push(`${who}：id「${b.id}」只能用小寫英數與 -，它會進網址`);
   else if (ids.has(b.id)) errors.push(`${who}：id「${b.id}」重複`);
   if (b.id) ids.add(b.id);
   if (!b.name) errors.push(`${who}：沒有 name`);
@@ -66,11 +67,14 @@ MILESTONES.forEach((r, i) => {
   if (r.endDate !== undefined) {
     const end = parseDate(r.endDate);
     if (!end) errors.push(`${at}：endDate「${r.endDate}」格式不對`);
-    else if (date && end <= date) errors.push(`${at}：endDate 要晚於 date，結束日不能等於或早於開始日`);
+    else if (date && end <= date)
+      errors.push(`${at}：endDate 要晚於 date，結束日不能等於或早於開始日`);
   }
 
   if (r.category !== undefined && !isCategoryKey(r.category)) {
-    errors.push(`${at}：category「${r.category}」不在分類表裡，可用：${Object.keys(CATS).join("、")}`);
+    errors.push(
+      `${at}：category「${r.category}」不在分類表裡，可用：${Object.keys(CATS).join("、")}`,
+    );
   }
 
   if (r.who !== undefined) {
@@ -78,12 +82,14 @@ MILESTONES.forEach((r, i) => {
       warns.push(`${at}：who 是空陣列，等於沒寫，會當全家共同；是的話直接不寫這個欄位`);
     }
     r.who.forEach((id) => {
-      if (!ids.has(id)) errors.push(`${at}：who 的「${id}」不是寶寶 id，可用：${[...ids].join("、")}`);
+      if (!ids.has(id))
+        errors.push(`${at}：who 的「${id}」不是寶寶 id，可用：${[...ids].join("、")}`);
     });
   }
 
   if (r.measures) {
-    if (!r.who || r.who.length !== 1) errors.push(`${at}：有 measures 就要一筆一人，who 只能寫一個`);
+    if (!r.who || r.who.length !== 1)
+      errors.push(`${at}：有 measures 就要一筆一人，who 只能寫一個`);
     const range: Record<string, [number, number, string]> = {
       height: [30, 130, "cm"],
       weight: [1, 40, "kg"],
@@ -109,14 +115,17 @@ MILESTONES.forEach((r, i) => {
     }
     usedPhotos.add(path.resolve(file));
     if (!existsSync(path.join(PUBLIC, thumbOf(rel)))) {
-      warns.push(`${at}：照片 ${p} 沒有縮圖，手機會下載整張大圖；原圖放進 photos/ 跑 npm run photos`);
+      warns.push(
+        `${at}：照片 ${p} 沒有縮圖，手機會下載整張大圖；原圖放進 photos/ 跑 npm run photos`,
+      );
     }
   });
 
   if (date && r.title) {
     const key = `${r.date}|${String(r.title).trim()}|${(r.who ?? []).join(",")}`;
     const prev = seen.get(key);
-    if (prev !== undefined) warns.push(`${at}：跟第 ${prev + 1} 筆同日、同標題、同人，是重複貼到嗎？`);
+    if (prev !== undefined)
+      warns.push(`${at}：跟第 ${prev + 1} 筆同日、同標題、同人，是重複貼到嗎？`);
     seen.set(key, i);
   }
 });

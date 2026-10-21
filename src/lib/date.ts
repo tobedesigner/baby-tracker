@@ -8,7 +8,9 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
 /** "2026-09-09" / "2026/9/9" → Date；格式不對或日期不存在（2 月 30 日）回 null */
 export function parseDate(s: string | null | undefined): Date | null {
   if (!s) return null;
-  const m = String(s).trim().match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+  const m = String(s)
+    .trim()
+    .match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
   if (!m) return null;
   const [y, mo, d] = [+m[1], +m[2], +m[3]];
   const date = new Date(y, mo - 1, d);

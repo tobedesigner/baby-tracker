@@ -246,9 +246,28 @@ describe("seriesFor / lastRecordDate", () => {
 
 describe("matchesTag / matchesSearch / isPlain", () => {
   const { items } = norm([
-    { date: "2026-09-28", title: "第二次感冒", who: ["una"], note: "疑似二度感染。", tags: ["感冒"] },
-    { date: "2026-09-26", title: "第一次吃魚片", who: ["uwa", "una"], place: "火鍋店", tags: ["副食品"] },
-    { date: "2026-09-30", title: "吐奶", who: ["una"], people: ["爸爸"], memo: "心疼", tags: ["吐奶"] },
+    {
+      date: "2026-09-28",
+      title: "第二次感冒",
+      who: ["una"],
+      note: "疑似二度感染。",
+      tags: ["感冒"],
+    },
+    {
+      date: "2026-09-26",
+      title: "第一次吃魚片",
+      who: ["uwa", "una"],
+      place: "火鍋店",
+      tags: ["副食品"],
+    },
+    {
+      date: "2026-09-30",
+      title: "吐奶",
+      who: ["una"],
+      people: ["爸爸"],
+      memo: "心疼",
+      tags: ["吐奶"],
+    },
   ]);
 
   it("標籤要完全相同", () => {

@@ -11,10 +11,7 @@ interface Props {
 /** 出生也是時間軸上的一個節點 */
 export function BirthCard({ row, view, multi }: Props) {
   return (
-    <div
-      className="birth"
-      style={{ "--c": row.baby.accent || "var(--accent)" } as CSSProperties}
-    >
+    <div className="birth" style={{ "--c": row.baby.accent || "var(--accent)" } as CSSProperties}>
       <div className="card">
         <div className="top">
           <span className="date">{fmtDate(row.date)}</span>

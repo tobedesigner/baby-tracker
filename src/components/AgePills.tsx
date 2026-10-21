@@ -14,8 +14,7 @@ export function AgePills({ babies, showNames }: Props) {
   if (!show.length) return <div className="ages" />;
 
   const now = today();
-  const twins =
-    show.length > 1 && show.every((b) => b.bd!.getTime() === show[0].bd!.getTime());
+  const twins = show.length > 1 && show.every((b) => b.bd!.getTime() === show[0].bd!.getTime());
 
   if (twins) {
     return (

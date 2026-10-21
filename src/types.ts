@@ -1,14 +1,7 @@
 /* 全站共用型別。編輯 data/ 底下的資料檔時，欄位打錯會直接在編輯器紅字。 */
 
 /** 分類代號，決定顏色與篩選鈕 */
-export type CategoryKey =
-  | "first"
-  | "growth"
-  | "health"
-  | "care"
-  | "daily"
-  | "travel"
-  | "holiday";
+export type CategoryKey = "first" | "growth" | "health" | "care" | "daily" | "travel" | "holiday";
 
 /** 身高／體重／頭圍，單位是公分與公斤 */
 export interface Measures {

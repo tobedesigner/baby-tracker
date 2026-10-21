@@ -134,11 +134,9 @@ async function main(): Promise<void> {
     const byDate = new Map<string, string[]>();
     done.forEach((x) => byDate.set(x.date, [...(byDate.get(x.date) ?? []), x.rel]));
     console.log("\n貼進 milestones.ts 的寫法（同一天的已經合在一起）：");
-    [...byDate.entries()]
-      .sort()
-      .forEach(([date, rels]) => {
-        console.log(`  ${date}  photos: [${rels.map((r) => `"${r}"`).join(", ")}],`);
-      });
+    [...byDate.entries()].sort().forEach(([date, rels]) => {
+      console.log(`  ${date}  photos: [${rels.map((r) => `"${r}"`).join(", ")}],`);
+    });
   }
   if (failed) process.exit(1);
 }

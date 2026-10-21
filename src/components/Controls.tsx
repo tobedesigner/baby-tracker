@@ -35,7 +35,7 @@ export function Controls({
   onToggleOrder,
   stuck,
 }: Props) {
-    const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (searchOpen) inputRef.current?.focus();
   }, [searchOpen]);

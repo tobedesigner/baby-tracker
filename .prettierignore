@@ -1,0 +1,9 @@
+dist
+node_modules
+public
+photos
+package-lock.json
+# 樣式檔是刻意寫成一行一條規則，prettier 會全部拆開
+src/styles
+# README 的表格有中文，prettier 對齊會把它弄亂
+*.md

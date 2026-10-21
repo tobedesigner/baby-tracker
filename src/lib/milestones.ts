@@ -19,9 +19,7 @@ export function normalizeBabies(input: BabyInput[]): {
   byId: Record<string, Baby>;
   allIds: string[];
 } {
-  const babies = input
-    .filter((b) => b && b.id)
-    .map((b) => ({ ...b, bd: parseDate(b.birthday) }));
+  const babies = input.filter((b) => b && b.id).map((b) => ({ ...b, bd: parseDate(b.birthday) }));
   const byId: Record<string, Baby> = {};
   babies.forEach((b) => {
     byId[b.id] = b;
@@ -183,9 +181,7 @@ export function visibleRows(
     });
   }
 
-  return rows.sort(
-    (a, b) => order * (a.date.getTime() - b.date.getTime()) || order * (a.i - b.i),
-  );
+  return rows.sort((a, b) => order * (a.date.getTime() - b.date.getTime()) || order * (a.i - b.i));
 }
 
 export interface GrowthPoint {
@@ -196,11 +192,7 @@ export interface GrowthPoint {
 }
 
 /** 量測只算 who 剛好一個人的紀錄（不然不知道數字是誰的） */
-export function seriesFor(
-  items: Milestone[],
-  baby: Baby,
-  key: keyof Measures,
-): GrowthPoint[] {
+export function seriesFor(items: Milestone[], baby: Baby, key: keyof Measures): GrowthPoint[] {
   if (!baby.bd) return [];
   const bd = baby.bd;
   return items
@@ -257,11 +249,7 @@ export function ageChips(
 }
 
 /** 時間軸上小圓點的顏色：看全部時用寶寶代表色，看單一寶寶時顏色留給分類 */
-export function dotColor(
-  m: Milestone,
-  view: View,
-  byId: Record<string, Baby>,
-): string | null {
+export function dotColor(m: Milestone, view: View, byId: Record<string, Baby>): string | null {
   if (view !== "all") return m.catColor;
   if (m.who.length === 1) return byId[m.who[0]].accent;
   return null; // 共同事件：用預設灰
