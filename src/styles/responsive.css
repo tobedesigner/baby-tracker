@@ -28,7 +28,7 @@
     max-width:1160px;display:grid;grid-template-columns:290px minmax(0,1fr);
     gap:0 56px;align-items:start;padding:0 40px 96px;
   }
-  .side{position:sticky;top:0;align-self:start;padding:56px 0 24px}
+  .side{display:block;position:sticky;top:0;align-self:start;padding:56px 0 24px}
   header{padding:0;text-align:left}
   .hi{margin-bottom:12px}
   h1{font-size:36px}

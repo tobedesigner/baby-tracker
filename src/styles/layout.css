@@ -6,6 +6,8 @@
    桌機   ：左側固定欄（名字＋切換＋篩選）＋右側時間軸
    ========================================================= */
 .shell{max-width:680px;margin:0 auto;padding:0 18px 72px}
+/* 手機與平板：側欄不產生自己的盒子，不然篩選列的 sticky 會被側欄的高度框住、捲過去就跟著走 */
+.side{display:contents}
 
 /* ---------- header ---------- */
 header{padding:40px 0 20px;text-align:center}
@@ -34,12 +36,12 @@ h1{margin:0;font-size:32px;line-height:1.25;font-weight:700;letter-spacing:.01em
 
 .ages{margin-top:16px;display:flex;flex-direction:column;gap:6px;align-items:center}
 .agepill{
-  display:inline-flex;align-items:baseline;gap:8px;padding:7px 15px;
+  display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:7px 15px;
   background:var(--surface);border:1px solid var(--line);border-radius:999px;
   font-size:14px;color:var(--ink-2);box-shadow:var(--shadow);
 }
-.agepill .who{font-weight:600;color:var(--wc,var(--ink))}
-.agepill b{color:var(--wc,var(--accent));font-weight:600}
+.agepill .who{font-weight:600;color:var(--wc,var(--ink));white-space:nowrap}
+.agepill b{color:var(--wc,var(--accent));font-weight:600;white-space:nowrap}
 .agepill .bd{color:var(--muted);font-size:12px}
 
 /* ---------- 篩選列 ---------- */
