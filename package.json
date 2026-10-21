@@ -14,7 +14,8 @@
     "check": "node scripts/check-data.ts",
     "test": "vitest run",
     "photos": "node scripts/photos.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "icons": "node scripts/icons.ts"
   },
   "dependencies": {
     "react": "^19.3.0",

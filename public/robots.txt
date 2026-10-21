@@ -1,3 +1,5 @@
 # 不希望這個站被搜尋引擎收錄，只給拿到網址的人看。
+# og.png 例外：LINE、Facebook 抓分享預覽圖時要拿得到。
 User-agent: *
+Allow: /og.png
 Disallow: /
