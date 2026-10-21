@@ -1,11 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { BabyInput, MilestoneInput } from "../types";
+import type { BabyInput, Filter, MilestoneInput } from "../types";
 import { isBirthRow } from "../types";
+import type { Criteria } from "./milestones";
 import {
   ageChips,
   dotColor,
   inView,
+  isPlain,
   lastRecordDate,
+  matchesSearch,
+  matchesTag,
   normalizeBabies,
   normalizeMilestones,
   seriesFor,
@@ -18,6 +22,13 @@ const BABIES: BabyInput[] = [
 ];
 const { babies, byId, allIds } = normalizeBabies(BABIES);
 const d = (y: number, m: number, day: number) => new Date(y, m - 1, day);
+const crit = (view: string, filter: Filter = null, extra: Partial<Criteria> = {}): Criteria => ({
+  view,
+  filter,
+  tag: null,
+  q: "",
+  ...extra,
+});
 
 function norm(raw: MilestoneInput[]) {
   return normalizeMilestones(raw, byId);
@@ -128,7 +139,7 @@ describe("inView / visibleRows", () => {
   });
 
   it("新的在上：日期由新到舊，出生節點插在正確位置", () => {
-    const rows = visibleRows(items, babies, allIds, "all", null, -1);
+    const rows = visibleRows(items, babies, allIds, crit("all"), -1);
     expect(rows.map((r) => (isBirthRow(r) ? `出生:${r.baby.id}` : r.title))).toEqual([
       "予安的事",
       "兩個人的事",
@@ -141,7 +152,7 @@ describe("inView / visibleRows", () => {
   });
 
   it("舊的在上：出生前的產檢排在出生前面", () => {
-    const rows = visibleRows(items, babies, allIds, "una", null, 1);
+    const rows = visibleRows(items, babies, allIds, crit("una"), 1);
     expect(rows.map((r) => (isBirthRow(r) ? "出生" : r.title))).toEqual([
       "產檢",
       "出生",
@@ -152,13 +163,13 @@ describe("inView / visibleRows", () => {
   });
 
   it("有篩選時不插出生節點", () => {
-    const rows = visibleRows(items, babies, allIds, "all", "travel", -1);
+    const rows = visibleRows(items, babies, allIds, crit("all", "travel"), -1);
     expect(rows).toHaveLength(1);
     expect(rows.some(isBirthRow)).toBe(false);
   });
 
   it("重點篩選", () => {
-    const rows = visibleRows(items, babies, allIds, "all", "hl", -1);
+    const rows = visibleRows(items, babies, allIds, crit("all", "hl"), -1);
     expect(rows.map((r) => !isBirthRow(r) && r.title)).toEqual(["產檢"]);
   });
 });
@@ -230,5 +241,42 @@ describe("seriesFor / lastRecordDate", () => {
     expect(lastRecordDate(items)).toEqual(d(2026, 10, 6));
     expect(lastRecordDate(items.filter((m) => m.title === "感冒"))).toEqual(d(2026, 9, 21));
     expect(lastRecordDate([])).toBeNull();
+  });
+});
+
+describe("matchesTag / matchesSearch / isPlain", () => {
+  const { items } = norm([
+    { date: "2026-09-28", title: "第二次感冒", who: ["una"], note: "疑似二度感染。", tags: ["感冒"] },
+    { date: "2026-09-26", title: "第一次吃魚片", who: ["uwa", "una"], place: "火鍋店", tags: ["副食品"] },
+    { date: "2026-09-30", title: "吐奶", who: ["una"], people: ["爸爸"], memo: "心疼", tags: ["吐奶"] },
+  ]);
+
+  it("標籤要完全相同", () => {
+    expect(items.filter((m) => matchesTag(m, "感冒")).map((m) => m.title)).toEqual(["第二次感冒"]);
+    expect(items.filter((m) => matchesTag(m, "感")).length).toBe(0);
+    expect(items.every((m) => matchesTag(m, null))).toBe(true);
+  });
+
+  it("搜尋比對標題、說明、備註、地點、人與標籤，忽略大小寫與前後空白", () => {
+    const hit = (q: string) => items.filter((m) => matchesSearch(m, q)).map((m) => m.title);
+    expect(hit("感染")).toEqual(["第二次感冒"]);
+    expect(hit("火鍋")).toEqual(["第一次吃魚片"]);
+    expect(hit("爸爸")).toEqual(["吐奶"]);
+    expect(hit("心疼")).toEqual(["吐奶"]);
+    expect(hit("副食品")).toEqual(["第一次吃魚片"]);
+    expect(hit("  感冒 ")).toEqual(["第二次感冒"]);
+    expect(hit("")).toHaveLength(3);
+    expect(hit("   ")).toHaveLength(3);
+    expect(hit("沒有這個")).toHaveLength(0);
+  });
+
+  it("有標籤或搜尋時不插出生節點", () => {
+    const byTag = visibleRows(items, babies, allIds, crit("una", null, { tag: "感冒" }), -1);
+    expect(byTag.map((r) => !isBirthRow(r) && r.title)).toEqual(["第二次感冒"]);
+    const byQ = visibleRows(items, babies, allIds, crit("all", null, { q: "吐" }), -1);
+    expect(byQ.map((r) => !isBirthRow(r) && r.title)).toEqual(["吐奶"]);
+    expect(isPlain(crit("all"))).toBe(true);
+    expect(isPlain(crit("all", "hl"))).toBe(false);
+    expect(isPlain(crit("all", null, { q: " " }))).toBe(true);
   });
 });

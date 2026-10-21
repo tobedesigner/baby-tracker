@@ -38,6 +38,11 @@
 }
 .card .foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;align-items:center}
 .tag{font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border-radius:6px;padding:2.5px 8px}
+/* 自由標籤是按鈕，點了只看同標籤的紀錄 */
+button.tag{appearance:none;border:0;font-family:inherit;line-height:inherit;cursor:pointer;transition:background .15s,color .15s}
+button.tag:hover{background:var(--line)}
+button.tag[aria-pressed="true"]{background:var(--accent);color:#fff}
+button.tag:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .tag.where::before{content:"📍 "}
 .tag.who2::before{content:"👤 "}
 .ms{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
@@ -60,6 +65,7 @@
 .birth h3{font-size:16px}
 
 .empty{text-align:center;color:var(--muted);font-size:14px;padding:52px 20px;border:1px dashed var(--line);border-radius:var(--radius);margin-top:22px}
+.empty .linkbtn{appearance:none;border:0;background:none;font:inherit;color:var(--accent);cursor:pointer;text-decoration:underline;margin-left:6px;padding:0}
 
 @media (prefers-reduced-motion:no-preference){
   .item,.birth{animation:rise .38s ease both}

@@ -10,6 +10,11 @@ interface Props {
   multi: boolean;
   byId: Record<string, Baby>;
   allIds: string[];
+  tag: string | null;
+  onTag: (tag: string) => void;
+  /** 有套任何篩選或搜尋：空列表時顯示「沒有符合」而不是「還沒有紀錄」 */
+  filtered: boolean;
+  onClear: () => void;
   onOpenPhoto: (photos: string[], index: number, alt: string) => void;
 }
 
@@ -25,11 +30,33 @@ function groupByYear(rows: Row[]): { year: number; rows: Row[] }[] {
   return groups;
 }
 
-export function Timeline({ rows, view, multi, byId, allIds, onOpenPhoto }: Props) {
+export function Timeline({
+  rows,
+  view,
+  multi,
+  byId,
+  allIds,
+  tag,
+  onTag,
+  filtered,
+  onClear,
+  onOpenPhoto,
+}: Props) {
   if (!rows.length) {
     return (
       <main id="list">
-        <div className="empty">這裡還沒有紀錄。</div>
+        <div className="empty">
+          {filtered ? (
+            <>
+              沒有符合的紀錄。
+              <button type="button" className="linkbtn" onClick={onClear}>
+                清除篩選
+              </button>
+            </>
+          ) : (
+            "這裡還沒有紀錄。"
+          )}
+        </div>
       </main>
     );
   }
@@ -53,6 +80,8 @@ export function Timeline({ rows, view, multi, byId, allIds, onOpenPhoto }: Props
                   multi={multi}
                   byId={byId}
                   allIds={allIds}
+                  tag={tag}
+                  onTag={onTag}
                   onOpenPhoto={onOpenPhoto}
                 />
               ),

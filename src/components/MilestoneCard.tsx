@@ -4,7 +4,7 @@ import type { Baby, Measures, Milestone, View } from "../types";
 import { CATS } from "../lib/categories";
 import { fmtRange, spanDays } from "../lib/date";
 import { ageChips, dotColor } from "../lib/milestones";
-import { assetUrl } from "../lib/asset";
+import { assetUrl, thumbOf } from "../lib/asset";
 
 interface Props {
   m: Milestone;
@@ -12,6 +12,8 @@ interface Props {
   multi: boolean;
   byId: Record<string, Baby>;
   allIds: string[];
+  tag: string | null;
+  onTag: (tag: string) => void;
   onOpenPhoto: (photos: string[], index: number, alt: string) => void;
 }
 
@@ -21,8 +23,9 @@ const MEASURE_FIELDS: { key: keyof Measures; label: string; unit: string }[] = [
   { key: "head", label: "頭圍", unit: "cm" },
 ];
 
-export function MilestoneCard({ m, view, multi, byId, allIds, onOpenPhoto }: Props) {
-  // 找不到的圖片直接收起來，不留破圖
+export function MilestoneCard({ m, view, multi, byId, allIds, tag, onTag, onOpenPhoto }: Props) {
+  // 卡片先載縮圖（a.thumb.webp），沒有縮圖就退回原圖，原圖也沒有就整張收起來不留破圖
+  const [noThumb, setNoThumb] = useState<string[]>([]);
   const [broken, setBroken] = useState<string[]>([]);
 
   const color = dotColor(m, view, byId);
@@ -101,21 +104,27 @@ export function MilestoneCard({ m, view, multi, byId, allIds, onOpenPhoto }: Pro
 
         {photos.length > 0 && (
           <div className={`shots${photos.length === 1 ? " one" : ""}`}>
-            {photos.map((src, idx) => (
-              <button
-                key={src}
-                type="button"
-                onClick={() => onOpenPhoto(photos.map(assetUrl), idx, m.title)}
-              >
-                <img
-                  src={assetUrl(src)}
-                  alt={m.title}
-                  loading="lazy"
-                  decoding="async"
-                  onError={() => setBroken((prev) => [...prev, src])}
-                />
-              </button>
-            ))}
+            {photos.map((src, idx) => {
+              const useFull = noThumb.includes(src) || thumbOf(src) === src;
+              return (
+                <button
+                  key={src}
+                  type="button"
+                  onClick={() => onOpenPhoto(photos.map(assetUrl), idx, m.title)}
+                >
+                  <img
+                    src={assetUrl(useFull ? src : thumbOf(src))}
+                    alt={m.title}
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => {
+                      if (useFull) setBroken((prev) => [...prev, src]);
+                      else setNoThumb((prev) => [...prev, src]);
+                    }}
+                  />
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -128,9 +137,16 @@ export function MilestoneCard({ m, view, multi, byId, allIds, onOpenPhoto }: Pro
               </span>
             ))}
             {m.tags.map((t) => (
-              <span key={t} className="tag">
+              <button
+                key={t}
+                type="button"
+                className="tag"
+                aria-pressed={tag === t}
+                title={tag === t ? "取消標籤篩選" : `只看「${t}」`}
+                onClick={() => onTag(t)}
+              >
                 {t}
-              </span>
+              </button>
             ))}
           </div>
         )}

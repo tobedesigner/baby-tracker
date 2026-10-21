@@ -5,10 +5,14 @@ import { BABIES } from "./data/babies";
 import { MILESTONES } from "./data/milestones";
 import { SITE } from "./data/site";
 import { fmtDate } from "./lib/date";
+import type { Criteria } from "./lib/milestones";
 import {
   inView,
+  isPlain,
   lastRecordDate,
   matchesFilter,
+  matchesSearch,
+  matchesTag,
   normalizeBabies,
   normalizeMilestones,
   visibleRows,
@@ -41,7 +45,12 @@ export function App() {
     isValidView,
   );
 
+  // 看誰以外的條件都只留在記憶體裡，不進網址：換個人看時不會帶著別人的篩選
   const [filter, setFilter] = useState<Filter>(null);
+  const [tag, setTag] = useState<string | null>(null);
+  const [q, setQ] = useState("");
+  // 搜尋框開著沒有：提到這裡，「清除篩選」才能連搜尋框一起收起來
+  const [searchOpen, setSearchOpen] = useState(false);
   const [order, setOrder] = useState<Order>(SITE.defaultOrder === "oldest" ? 1 : -1);
   const [photo, setPhoto] = useState<OpenPhoto | null>(null);
 
@@ -54,23 +63,38 @@ export function App() {
     document.title = `${baby ? `${baby.name}的` : ""}${SITE.title || "成長里程碑"}`;
   }, [baby]);
 
-  const pool = useMemo(
+  // 目前檢視看得到的全部（還沒套標籤與搜尋）
+  const viewPool = useMemo(
     () => items.filter((m) => inView(m, view, allIds)),
     [items, view, allIds],
   );
 
-  // 切換看誰之後，原本的篩選若在新範圍裡一筆都沒有就退回「全部」，
-  // 不然 chip 消失、列表空白，卻看不出是哪個篩選造成的。
+  // 切換看誰之後，標籤若在新範圍裡一筆都沒有就取消。
   // 在 render 期間調整 state 是 React 建議的作法，不會先畫出空白再跳回來。
   const [prevView, setPrevView] = useState(view);
   if (view !== prevView) {
     setPrevView(view);
+    if (tag !== null && !viewPool.some((m) => m.tags.includes(tag))) setTag(null);
+  }
+
+  // 套上標籤與搜尋後的範圍：分類 chip 的筆數用這個算，所以 chip 會跟著搜尋縮減
+  const pool = useMemo(
+    () => viewPool.filter((m) => matchesTag(m, tag) && matchesSearch(m, q)),
+    [viewPool, tag, q],
+  );
+
+  // 範圍變了之後，原本的分類篩選若一筆都沒有就退回「全部」，
+  // 不然 chip 消失、列表空白，卻看不出是哪個篩選造成的。
+  const [prevPool, setPrevPool] = useState(pool);
+  if (pool !== prevPool) {
+    setPrevPool(pool);
     if (filter !== null && !pool.some((m) => matchesFilter(m, filter))) setFilter(null);
   }
 
+  const criteria = useMemo<Criteria>(() => ({ view, filter, tag, q }), [view, filter, tag, q]);
   const rows = useMemo(
-    () => visibleRows(items, babies, allIds, view, filter, order),
-    [items, babies, allIds, view, filter, order],
+    () => visibleRows(items, babies, allIds, criteria, order),
+    [items, babies, allIds, criteria, order],
   );
 
   const shown = rows.filter((r) => !isBirthRow(r)).length;
@@ -79,6 +103,14 @@ export function App() {
 
   const { sentinelRef, stuck } = useStuck();
   const closePhoto = useCallback(() => setPhoto(null), []);
+  // 點卡片上的標籤：點已選的那個就取消
+  const toggleTag = useCallback((t: string) => setTag((cur) => (cur === t ? null : t)), []);
+  const clearAll = useCallback(() => {
+    setFilter(null);
+    setTag(null);
+    setQ("");
+    setSearchOpen(false);
+  }, []);
 
   return (
     <>
@@ -93,6 +125,12 @@ export function App() {
           pool={pool}
           filter={filter}
           onFilter={setFilter}
+          tag={tag}
+          onTag={setTag}
+          q={q}
+          onQuery={setQ}
+          searchOpen={searchOpen}
+          onSearchOpen={setSearchOpen}
           countLabel={countLabel}
           order={order}
           onToggleOrder={() => setOrder((o) => (o === -1 ? 1 : -1))}
@@ -107,6 +145,10 @@ export function App() {
             multi={multi}
             byId={byId}
             allIds={allIds}
+            tag={tag}
+            onTag={toggleTag}
+            filtered={!isPlain(criteria)}
+            onClear={clearAll}
             onOpenPhoto={(photos, index, alt) => setPhoto({ photos, index, alt })}
           />
           <GrowthCharts items={items} babies={babies} view={view} byId={byId} />

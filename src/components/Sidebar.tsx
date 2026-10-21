@@ -14,6 +14,12 @@ interface Props {
   pool: Milestone[];
   filter: Filter;
   onFilter: (filter: Filter) => void;
+  tag: string | null;
+  onTag: (tag: string | null) => void;
+  q: string;
+  onQuery: (q: string) => void;
+  searchOpen: boolean;
+  onSearchOpen: (open: boolean) => void;
   countLabel: string;
   order: Order;
   onToggleOrder: () => void;
@@ -32,6 +38,12 @@ export function Sidebar({
   pool,
   filter,
   onFilter,
+  tag,
+  onTag,
+  q,
+  onQuery,
+  searchOpen,
+  onSearchOpen,
   countLabel,
   order,
   onToggleOrder,
@@ -55,6 +67,12 @@ export function Sidebar({
         pool={pool}
         filter={filter}
         onFilter={onFilter}
+        tag={tag}
+        onTag={onTag}
+        q={q}
+        onQuery={onQuery}
+        searchOpen={searchOpen}
+        onSearchOpen={onSearchOpen}
         countLabel={countLabel}
         order={order}
         onToggleOrder={onToggleOrder}

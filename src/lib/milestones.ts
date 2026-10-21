@@ -125,24 +125,60 @@ export function matchesFilter(m: Milestone, filter: Filter): boolean {
   return m.cat === filter;
 }
 
+/** 標籤篩選：點卡片上的標籤設定；null＝不限 */
+export function matchesTag(m: Milestone, tag: string | null): boolean {
+  return tag === null || m.tags.includes(tag);
+}
+
+/** 搜尋標題、說明、備註、地點、在場的人與標籤；不分大小寫、忽略前後空白，空字串＝不限 */
+export function matchesSearch(m: Milestone, q: string): boolean {
+  const s = q.trim().toLowerCase();
+  if (!s) return true;
+  return [m.title, m.note, m.memo, m.place, ...m.people, ...m.tags].some((f) =>
+    f.toLowerCase().includes(s),
+  );
+}
+
+/** 時間軸目前套用的全部條件 */
+export interface Criteria {
+  view: View;
+  filter: Filter;
+  tag: string | null;
+  q: string;
+}
+
+export function matchesCriteria(m: Milestone, c: Criteria, allIds: string[]): boolean {
+  return (
+    inView(m, c.view, allIds) &&
+    matchesFilter(m, c.filter) &&
+    matchesTag(m, c.tag) &&
+    matchesSearch(m, c.q)
+  );
+}
+
+/** 除了「看誰」之外沒有任何條件：這時才插出生節點、空列表才算真的沒資料 */
+export function isPlain(c: Criteria): boolean {
+  return c.filter === null && c.tag === null && !c.q.trim();
+}
+
 /**
- * 套上檢視與分類篩選、插入出生節點、依日期排序。
- * 出生當作時間軸節點跟著日期一起排，產檢這類出生前的紀錄才會排在下面。
+ * 套上全部條件、插入出生節點、依日期排序。
+ * 出生當作時間軸節點跟著日期一起排，產檢這類出生前的紀錄才會排在下面；
+ * 有任何篩選或搜尋時就不插，免得「搜 感冒」卻跑出出生那筆。
  */
 export function visibleRows(
   items: Milestone[],
   babies: Baby[],
   allIds: string[],
-  view: View,
-  filter: Filter,
+  c: Criteria,
   order: Order,
 ): Row[] {
-  const rows: Row[] = items.filter((m) => inView(m, view, allIds) && matchesFilter(m, filter));
+  const rows: Row[] = items.filter((m) => matchesCriteria(m, c, allIds));
 
-  if (filter === null) {
+  if (isPlain(c)) {
     babies.forEach((baby) => {
       if (!baby.bd) return;
-      if (view !== "all" && view !== baby.id) return;
+      if (c.view !== "all" && c.view !== baby.id) return;
       rows.push({ isBirth: true, baby, date: baby.bd, i: -1 });
     });
   }
