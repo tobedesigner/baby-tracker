@@ -1,40 +1,27 @@
-/* 色票、深色模式、字型。改整站配色從這裡的變數改。
-   日記風：白底黑字，一個墨綠強調色，標題與數字用襯線體，內文用系統字型。 */
+/* 色票與字型。改整站配色從這裡的變數改。
+   日記風的版面配暖色系：米色底、暖棕黑字、一個墨綠強調色，標題與數字用襯線體。
+   固定淺色，不跟系統的深色模式切換。 */
 
 :root{
   --accent:#2F6F73;
-  --bg:#FFFFFF;
-  --surface:#FFFFFF;
-  --surface-2:#F4F4F1;
-  --ink:#1B1B1B;
-  --ink-2:#5C5C5C;
-  --muted:#767676;
-  --line:#E6E6E2;
+  --bg:#F7F2EB;
+  --surface:#F7F2EB;
+  --surface-2:#EFE8DE;
+  --ink:#2B2622;
+  --ink-2:#6A5F58;
+  --muted:#736860;
+  --line:#E3D9CD;
   /* 月份下第一筆、清單與圖表上方的粗一點的線 */
-  --rule:#1B1B1B;
+  --rule:#2B2622;
   --radius:4px;
   --shadow:none;
-  /* 寶寶代表色在深色底要混多少白才看得清楚；淺色底不混 */
+  /* 寶寶代表色要混多少白；淺色底不混，留著是為了之後想加深色模式時只要改這裡 */
   --wc-white:0%;
   --serif:"Noto Serif TC","PingFang TC","Microsoft JhengHei",Georgia,serif;
   --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
 }
-@media (prefers-color-scheme: dark){
-  :root{
-    --accent:#7CB8BC;
-    --bg:#141414;
-    --surface:#141414;
-    --surface-2:#1E1E1E;
-    --ink:#ECECEC;
-    --ink-2:#B8B8B8;
-    --muted:#8F8F8F;
-    --line:#2A2A2A;
-    --rule:#ECECEC;
-    --wc-white:40%;
-  }
-}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;color-scheme:light}
 body{
   margin:0;
   background:var(--bg);
