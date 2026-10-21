@@ -5,6 +5,8 @@ import { CATEGORY_KEYS, CATS } from "../lib/categories";
 export interface MonthOption {
   ym: string;
   label: string;
+  /** 這個月有幾筆 */
+  n: number;
 }
 
 interface Props {

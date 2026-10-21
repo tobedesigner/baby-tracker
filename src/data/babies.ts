@@ -17,12 +17,12 @@ export const BABIES: BabyInput[] = [
     birthday: "2026-02-06",
 
     // 代表色，時間軸的點與切換鈕都會用
-    accent: "#E08A6E",
+    accent: "#B5633E",
   },
   {
     id: "una",
     name: "予樂",
     birthday: "2026-02-06",
-    accent: "#6E9EC4",
+    accent: "#3F6E9E",
   },
 ];

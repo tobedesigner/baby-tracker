@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import type { Baby, Row, View } from "../types";
 import { isBirthRow } from "../types";
-import { ymKey } from "../lib/date";
+import { monthName, ymKey } from "../lib/date";
 import type { Target } from "../lib/target";
 import { BirthCard } from "./BirthCard";
 import { MilestoneCard } from "./MilestoneCard";
@@ -25,6 +25,7 @@ interface Props {
 interface MonthGroup {
   ym: string;
   label: string;
+  year: number;
   rows: Row[];
 }
 interface YearGroup {
@@ -32,7 +33,7 @@ interface YearGroup {
   months: MonthGroup[];
 }
 
-/** 依年份切段、年份裡再依月份分小節。每一年一條軸線，月份是軸線上的小標 */
+/** 依年份切段、年份裡再依月份分小節。月份是章節標題，年份只是小標 */
 function groupRows(rows: Row[]): YearGroup[] {
   const years: YearGroup[] = [];
   rows.forEach((row) => {
@@ -45,7 +46,7 @@ function groupRows(rows: Row[]): YearGroup[] {
     }
     let mo = y.months[y.months.length - 1];
     if (!mo || mo.ym !== ym) {
-      mo = { ym, label: `${row.date.getMonth() + 1} 月`, rows: [] };
+      mo = { ym, label: monthName(row.date), year, rows: [] };
       y.months.push(mo);
     }
     mo.rows.push(row);
@@ -90,13 +91,14 @@ export function Timeline({
       {groupRows(rows).map((g) => (
         <Fragment key={g.year}>
           <div className="year">
-            <span>{g.year} 年</span>
+            <span>{g.year}</span>
           </div>
           <div className="tl">
             {g.months.map((mo) => (
               <Fragment key={mo.ym}>
                 <div className="month" id={`ym-${mo.ym}`}>
-                  <span>{mo.label}</span>
+                  <b>{mo.label}</b>
+                  <span>{mo.year}</span>
                 </div>
                 {mo.rows.map((row) =>
                   isBirthRow(row) ? (

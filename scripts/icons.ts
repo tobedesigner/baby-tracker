@@ -12,7 +12,7 @@ import { SITE } from "../src/data/site.ts";
 const ROOT = path.resolve(import.meta.dirname, "..");
 const PUBLIC = path.join(ROOT, "public");
 const ICONS = path.join(PUBLIC, "icons");
-const BG = "#FBF7F2";
+const BG = "#FFFFFF";
 
 /** 最多畫兩個圓：雙寶各一個，疊在一起；一個寶寶就一個圓 */
 const colors = BABIES.map((b) => b.accent)

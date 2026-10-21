@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { BirthRow, View } from "../types";
-import { fmtDate } from "../lib/date";
+import { weekdayLong } from "../lib/date";
 
 interface Props {
   row: BirthRow;
@@ -12,11 +12,12 @@ interface Props {
 export function BirthCard({ row, view, multi }: Props) {
   return (
     <div className="birth" style={{ "--c": row.baby.accent || "var(--accent)" } as CSSProperties}>
+      <div className="day">
+        <b>{row.date.getDate()}</b>
+        <span>{weekdayLong(row.date)}</span>
+      </div>
       <div className="card">
-        <div className="top">
-          <span className="date">{fmtDate(row.date)}</span>
-        </div>
-        <h3>{`${multi && view === "all" ? `${row.baby.name} ` : ""}出生 🍼`}</h3>
+        <h3>{`${multi && view === "all" ? `${row.baby.name} ` : ""}出生`}</h3>
       </div>
     </div>
   );

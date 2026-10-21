@@ -108,3 +108,25 @@ export function nextBirthday(bd: Date, now: Date): { date: Date; years: number; 
 export function ymKey(d: Date): string {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
 }
+
+const WEEKDAYS_LONG = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+/** 「週五」：日期欄用 */
+export function weekdayLong(d: Date): string {
+  return WEEKDAYS_LONG[d.getDay()];
+}
+
+const MONTHS_CN = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
+/** 「十月」：月份當章節標題用 */
+export function monthName(d: Date): string {
+  return `${MONTHS_CN[d.getMonth()]}月`;
+}
+
+/** 跨天的結束日：同月只寫「21 日（一）」，跨月寫「08/02（日）」，跨年再加年份 */
+export function fmtEnd(d: Date, e: Date): string {
+  const w = `（${WEEKDAYS[e.getDay()]}）`;
+  if (d.getFullYear() === e.getFullYear() && d.getMonth() === e.getMonth()) {
+    return `${e.getDate()} 日${w}`;
+  }
+  const y = d.getFullYear() === e.getFullYear() ? "" : `${e.getFullYear()}/`;
+  return `${y}${pad2(e.getMonth() + 1)}/${pad2(e.getDate())}${w}`;
+}

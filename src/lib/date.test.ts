@@ -138,3 +138,21 @@ describe("nextBirthday", () => {
     expect(ymKey(d(2026, 1, 1))).toBe("2026-01");
   });
 });
+
+describe("weekdayLong / monthName / fmtEnd", () => {
+  it("星期與月份的中文", async () => {
+    const { weekdayLong, monthName } = await import("./date");
+    expect(weekdayLong(d(2026, 10, 16))).toBe("週五");
+    expect(weekdayLong(d(2026, 2, 6))).toBe("週五");
+    expect(monthName(d(2026, 10, 1))).toBe("十月");
+    expect(monthName(d(2026, 1, 1))).toBe("一月");
+    expect(monthName(d(2026, 12, 1))).toBe("十二月");
+  });
+
+  it("結束日：同月只寫日，跨月寫月日，跨年加年份", async () => {
+    const { fmtEnd } = await import("./date");
+    expect(fmtEnd(d(2026, 9, 13), d(2026, 9, 21))).toBe("21 日（一）");
+    expect(fmtEnd(d(2026, 7, 30), d(2026, 8, 2))).toBe("08/02（日）");
+    expect(fmtEnd(d(2026, 12, 30), d(2027, 1, 2))).toBe("2027/01/02（六）");
+  });
+});

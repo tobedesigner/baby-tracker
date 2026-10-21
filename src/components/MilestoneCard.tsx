@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Baby, Measures, Milestone, View } from "../types";
 import { CATS } from "../lib/categories";
-import { fmtRange, spanDays } from "../lib/date";
+import { fmtEnd, spanDays, weekdayLong } from "../lib/date";
 import { ageChips, dotColor } from "../lib/milestones";
 import { assetUrl, thumbOf } from "../lib/asset";
 import { copyText, permalink } from "../lib/permalink";
@@ -81,10 +81,19 @@ export function MilestoneCard({
       className={`item${m.highlight ? " hl" : ""}${m.end ? " range" : ""}${isTarget ? " target" : ""}`}
       style={color ? ({ "--c": color } as CSSProperties) : undefined}
     >
+      {/* 日期：月份已經在章節標題，這裡只放日與星期；平板以上變成左側的數字欄 */}
+      <div className="day">
+        <b>{m.date.getDate()}</b>
+        <span>{weekdayLong(m.date)}</span>
+      </div>
+
       <div className="card">
         <div className="top">
-          <span className="date">{fmtRange(m.date, m.end)}</span>
-          {m.end && <span className="dur">共 {spanDays(m.date, m.end)} 天</span>}
+          {m.end && (
+            <span className="dur">
+              ～ {fmtEnd(m.date, m.end)}・共 {spanDays(m.date, m.end)} 天
+            </span>
+          )}
 
           {sameAge ? (
             <span className="age">

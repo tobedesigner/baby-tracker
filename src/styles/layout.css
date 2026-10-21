@@ -1,128 +1,99 @@
 /* =========================================================
-   版面骨架與側欄：shell / header / 寶寶切換 / 年齡 / 篩選列 / 頁尾
+   版面骨架與側欄：shell / header / 寶寶切換 / 年齡 / 篩選列 / 月份索引 / 頁尾
    三種寬度的差異集中在 responsive.css
-   手機   ：單欄，header → 篩選（吸頂）→ 時間軸 → 生長 → 頁尾
-   平板   ：同單欄，加寬、字級與間距放大
-   桌機   ：左側固定欄（名字＋切換＋篩選）＋右側時間軸
+   手機   ：單欄，header → 篩選（吸頂）→ 時間軸 → 清單 → 生長 → 頁尾
+   平板   ：同單欄加寬，日期變成左側的數字欄
+   桌機   ：左欄導覽固定 ＋ 中欄內文 ＋ 右欄月份索引固定
    ========================================================= */
-.shell{max-width:680px;margin:0 auto;padding:0 18px 72px}
-/* 手機與平板：側欄不產生自己的盒子，不然篩選列的 sticky 會被側欄的高度框住、捲過去就跟著走 */
-.side{display:contents}
+.shell{max-width:680px;margin:0 auto;padding:0 22px 72px}
 
 /* ---------- header ---------- */
-header{padding:40px 0 20px;text-align:center}
-.hi{font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
-h1{margin:0;font-size:32px;line-height:1.25;font-weight:700;letter-spacing:.01em;transition:color .2s}
-.subtitle{margin:8px 0 0;color:var(--ink-2);font-size:15px}
+header{padding:38px 0 6px;display:flex;flex-direction:column;gap:4px}
+.hi{font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin:0}
+h1{margin:0;font-family:var(--serif);font-size:30px;line-height:1.25;font-weight:700;letter-spacing:.01em}
+.subtitle{margin:0;color:var(--ink-2);font-size:14px}
+.subtitle:empty{display:none}
 
-/* 寶寶切換 */
-.who-switch{
-  display:inline-flex;gap:4px;margin-top:16px;padding:4px;
-  background:var(--surface-2);border-radius:999px;max-width:100%;overflow-x:auto;
-  scrollbar-width:none;
-}
+/* 寶寶切換：底線分頁 */
+.who-switch{display:flex;gap:22px;margin-top:14px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .who-switch::-webkit-scrollbar{display:none}
 .who-switch button{
   appearance:none;cursor:pointer;border:0;background:none;font-family:inherit;
-  padding:6px 15px;border-radius:999px;font-size:14px;color:var(--ink-2);
-  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
-  transition:background .16s,color .16s,box-shadow .16s;
+  padding:8px 0 7px;font-size:14px;color:var(--ink-2);
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;
 }
-.who-switch button i{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.7;flex:0 0 auto}
-.who-switch button[aria-pressed="true"]{
-  background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow);
-}
-.who-switch button[aria-pressed="true"] i{opacity:1}
+.who-switch button i{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.85;flex:0 0 auto}
+.who-switch button[aria-pressed="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
 
-.ages{margin-top:16px;display:flex;flex-direction:column;gap:6px;align-items:center}
-.agepill{
-  display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:7px 15px;
-  background:var(--surface);border:1px solid var(--line);border-radius:999px;
-  font-size:14px;color:var(--ink-2);box-shadow:var(--shadow);
-}
-.agepill .who{font-weight:600;color:var(--wc,var(--ink));white-space:nowrap}
-.agepill b{color:var(--wc,var(--accent));font-weight:600;white-space:nowrap}
+/* 年齡與倒數：一行文字，不做膠囊 */
+.ages{margin-top:12px;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline}
+.agepill{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;font-size:14px;color:var(--ink-2)}
+.agepill .who{font-weight:600;color:color-mix(in srgb,var(--wc,var(--ink)),#fff var(--wc-white));white-space:nowrap}
+.agepill b{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--accent);white-space:nowrap}
 .agepill .bd{color:var(--muted);font-size:12px}
+.countdown{margin-top:2px;display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12.5px;color:var(--muted)}
+.countdown b{font-weight:600;color:color-mix(in srgb,var(--wc,var(--ink-2)),#fff var(--wc-white));margin-right:4px}
 
-/* ---------- 篩選列 ---------- */
+/* ---------- 篩選列：文字連結，選中的畫底線 ---------- */
 .controls{
   position:sticky;top:0;z-index:20;
-  margin:16px -18px 0;padding:10px 18px;
-  background:color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter:saturate(1.4) blur(12px);
-  -webkit-backdrop-filter:saturate(1.4) blur(12px);
-  border-bottom:1px solid transparent;transition:border-color .2s;
+  margin:14px -22px 0;padding:8px 22px 8px;
+  background:var(--bg);border-bottom:1px solid var(--line);
 }
-.controls.stuck{border-bottom-color:var(--line)}
-.chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.controls.stuck{border-bottom-color:var(--ink-2)}
+.chips{display:flex;gap:16px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
 .chips::-webkit-scrollbar{display:none}
 .chip{
-  flex:0 0 auto;appearance:none;cursor:pointer;
-  border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
-  border-radius:999px;padding:6px 13px;font-size:13px;font-family:inherit;
-  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
-  transition:background .15s,color .15s,border-color .15s;
+  flex:0 0 auto;appearance:none;cursor:pointer;border:0;background:none;
+  color:var(--ink-2);padding:4px 0;font-size:13px;font-family:inherit;
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;
 }
-.chip:hover{border-color:var(--rail)}
-.chip .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.85;flex:0 0 auto}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chip[aria-pressed="true"] .dot{background:var(--bg)}
-.chip .n{font-size:11px;opacity:.6;margin-left:2px}
-.meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px;font-size:12.5px;color:var(--muted)}
+.chip:hover{color:var(--ink)}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7;flex:0 0 auto}
+.chip[aria-pressed="true"]{color:var(--accent);font-weight:600;border-bottom-color:var(--accent)}
+.chip .n{font-size:11px;color:var(--muted);margin-left:1px}
+.chip.tagchip{color:var(--accent);font-weight:600;border-bottom-color:var(--accent)}
+.chip.tagchip .x{font-size:10px;opacity:.7;margin-left:2px}
+.meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.meta-row .actions{display:inline-flex;align-items:center;gap:14px}
 .sortbtn,.iconbtn{
   appearance:none;background:none;border:0;padding:4px 0;color:var(--muted);
   font-size:12.5px;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
 }
-.sortbtn:hover,.iconbtn:hover{color:var(--ink-2)}
+.sortbtn:hover,.iconbtn:hover{color:var(--ink)}
 .sortbtn svg,.iconbtn svg{width:13px;height:13px;flex:0 0 auto}
-.meta-row .actions{display:inline-flex;align-items:center;gap:14px}
-
-/* 標籤篩選中：chips 最前面多一顆可取消的 */
-.chip.tagchip{background:var(--accent);border-color:var(--accent);color:#fff}
-.chip.tagchip .x{font-size:10px;opacity:.8;margin-left:2px}
-
-/* 搜尋框：只在打開時出現，手機的吸頂列才不會一直很高 */
-.search{
-  display:flex;align-items:center;gap:6px;margin-top:9px;padding:0 4px 0 10px;
-  background:var(--surface);border:1px solid var(--line);border-radius:10px;
-  transition:border-color .15s;
-}
-.search:focus-within{border-color:var(--accent)}
-.search svg{width:14px;height:14px;color:var(--muted);flex:0 0 auto}
-.search input{
-  flex:1;min-width:0;border:0;background:none;padding:8px 0;
-  font:inherit;font-size:14px;color:var(--ink);outline:none;
-}
-.search input::placeholder{color:var(--muted)}
-.search input::-webkit-search-cancel-button{display:none}
-.search .x{
-  appearance:none;border:0;background:none;color:var(--muted);cursor:pointer;
-  padding:6px 8px;font-size:12px;line-height:1;font-family:inherit;
-}
-.search .x:hover{color:var(--ink-2)}
-
-footer{margin-top:40px;text-align:center;font-size:12px;color:var(--muted);line-height:2}
-
-/* ---------- 跳到月份 ---------- */
 .jump{
   appearance:none;border:0;background:none;padding:4px 0;max-width:8.5em;
   color:var(--muted);font-size:12.5px;font-family:inherit;cursor:pointer;
 }
-.jump:hover{color:var(--ink-2)}
+.jump:hover{color:var(--ink)}
 
-/* ---------- 生日倒數 ---------- */
-.countdown{margin-top:10px;display:flex;flex-direction:column;gap:2px;align-items:center;font-size:12.5px;color:var(--muted)}
-.countdown b{font-weight:600;color:var(--wc,var(--ink-2));margin-right:4px}
+/* 搜尋：底線輸入框，只在打開時出現 */
+.search{display:flex;align-items:center;gap:8px;margin-top:8px;padding-bottom:2px;border-bottom:1px solid var(--ink-2);transition:border-color .15s}
+.search:focus-within{border-bottom-color:var(--accent)}
+.search svg{width:14px;height:14px;color:var(--muted);flex:0 0 auto}
+.search input{flex:1;min-width:0;border:0;background:none;padding:6px 0;font:inherit;font-size:14px;color:var(--ink);outline:none}
+.search input::placeholder{color:var(--muted)}
+.search input::-webkit-search-cancel-button{display:none}
+.search .x{appearance:none;border:0;background:none;color:var(--muted);cursor:pointer;padding:6px 4px;font-size:12px;line-height:1;font-family:inherit}
+.search .x:hover{color:var(--ink)}
+
+/* ---------- 月份索引：桌機右欄才出現 ---------- */
+.index{display:none}
 
 /* ---------- 回到最上面 ---------- */
 .totop{
   position:fixed;z-index:30;
   right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));
   width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
-  background:var(--surface);color:var(--ink-2);box-shadow:var(--shadow);cursor:pointer;
+  background:var(--bg);color:var(--ink-2);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.08);
   display:flex;align-items:center;justify-content:center;
   opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .2s,color .15s;
 }
 .totop.on{opacity:1;transform:none;pointer-events:auto}
 .totop:hover{color:var(--ink)}
 .totop svg{width:16px;height:16px}
+
+footer{margin-top:48px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:2}

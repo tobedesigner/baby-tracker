@@ -1,29 +1,36 @@
-/* 色票、深色模式、字型。改整站配色從這裡的變數改。 */
+/* 色票、深色模式、字型。改整站配色從這裡的變數改。
+   日記風：白底黑字，一個墨綠強調色，標題與數字用襯線體，內文用系統字型。 */
 
 :root{
-  --accent:#8C7B6E;
-  --bg:#FBF7F2;
+  --accent:#2F6F73;
+  --bg:#FFFFFF;
   --surface:#FFFFFF;
-  --surface-2:#F4EEE7;
-  --ink:#39322E;
-  --ink-2:#6B605A;
-  --muted:#9C9088;
-  --line:#E7DED4;
-  --rail:#E0D5C8;
-  --shadow:0 1px 2px rgba(58,45,36,.05), 0 8px 24px rgba(58,45,36,.06);
-  --radius:16px;
+  --surface-2:#F4F4F1;
+  --ink:#1B1B1B;
+  --ink-2:#5C5C5C;
+  --muted:#767676;
+  --line:#E6E6E2;
+  /* 月份下第一筆、清單與圖表上方的粗一點的線 */
+  --rule:#1B1B1B;
+  --radius:4px;
+  --shadow:none;
+  /* 寶寶代表色在深色底要混多少白才看得清楚；淺色底不混 */
+  --wc-white:0%;
+  --serif:"Noto Serif TC","PingFang TC","Microsoft JhengHei",Georgia,serif;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#17140F;
-    --surface:#211D18;
-    --surface-2:#2A251F;
-    --ink:#F0E9E1;
-    --ink-2:#C3B8AE;
-    --muted:#8E837A;
-    --line:#332D26;
-    --rail:#3A342C;
-    --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.28);
+    --accent:#7CB8BC;
+    --bg:#141414;
+    --surface:#141414;
+    --surface-2:#1E1E1E;
+    --ink:#ECECEC;
+    --ink-2:#B8B8B8;
+    --muted:#8F8F8F;
+    --line:#2A2A2A;
+    --rule:#ECECEC;
+    --wc-white:40%;
   }
 }
 *{box-sizing:border-box}
@@ -32,7 +39,7 @@ body{
   margin:0;
   background:var(--bg);
   color:var(--ink);
-  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-family:var(--sans);
   font-size:16px;
   line-height:1.7;
   -webkit-font-smoothing:antialiased;

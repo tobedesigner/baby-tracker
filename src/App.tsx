@@ -16,6 +16,7 @@ import {
   matchesTag,
   normalizeBabies,
   normalizeMilestones,
+  seriesFor,
   visibleRows,
 } from "./lib/milestones";
 import { checklistRows } from "./lib/checklist";
@@ -28,6 +29,7 @@ import { Checklist } from "./components/Checklist";
 import type { MonthOption } from "./components/Controls";
 import { GrowthCharts } from "./components/GrowthCharts";
 import { Lightbox } from "./components/Lightbox";
+import { MonthIndex } from "./components/MonthIndex";
 import { Sidebar } from "./components/Sidebar";
 import { Timeline } from "./components/Timeline";
 
@@ -67,7 +69,7 @@ export function App() {
 
   // 整站主色跟著目前看的寶寶換
   useEffect(() => {
-    const accent = baby ? baby.accent || SITE.accent : SITE.accent || "#8C7B6E";
+    const accent = baby ? baby.accent || SITE.accent : SITE.accent || "#2F6F73";
     document.documentElement.style.setProperty("--accent", accent);
     document.title = `${baby ? `${baby.name}的` : ""}${SITE.title || "成長里程碑"}`;
   }, [baby]);
@@ -110,14 +112,14 @@ export function App() {
   const countLabel = `${shown} 則${badCount ? `（${badCount} 筆格式有誤已略過）` : ""}`;
   const last = useMemo(() => lastRecordDate(items), [items]);
 
-  // 時間軸裡有的月份，照目前排序，給「跳到」用
+  // 時間軸裡有的月份與筆數，照目前排序，給「跳到月份」與右欄索引用
   const months = useMemo(() => {
     const out: MonthOption[] = [];
     rows.forEach((r) => {
       const ym = ymKey(r.date);
-      if (!out.some((o) => o.ym === ym)) {
-        out.push({ ym, label: `${r.date.getFullYear()} 年 ${r.date.getMonth() + 1} 月` });
-      }
+      const hit = out.find((o) => o.ym === ym);
+      if (hit) hit.n += 1;
+      else out.push({ ym, label: `${r.date.getFullYear()} 年 ${r.date.getMonth() + 1} 月`, n: 1 });
     });
     return out;
   }, [rows]);
@@ -130,6 +132,13 @@ export function App() {
     () => checklistRows(CHECKLIST, items, babies, view, allIds, now),
     [items, babies, view, allIds, now],
   );
+  // 跟 GrowthCharts 一樣的條件：目前看的人裡有誰累積兩筆以上量測，才有圖可以跳
+  const hasGrowth = useMemo(() => {
+    const who = view === "all" ? babies : [byId[view]].filter(Boolean);
+    return who.some((b) =>
+      (["height", "weight"] as const).some((k) => seriesFor(items, b, k).length >= 2),
+    );
+  }, [items, babies, byId, view]);
 
   const { sentinelRef, stuck } = useStuck();
   const closePhoto = useCallback(() => setPhoto(null), []);
@@ -211,6 +220,13 @@ export function App() {
             <div>{last ? `最後一筆紀錄：${fmtDate(last)}` : "還沒有任何紀錄"}</div>
           </footer>
         </div>
+
+        <MonthIndex
+          months={months}
+          onJump={jumpTo}
+          hasChecklist={ckRows.length > 0 && ckRows[0].cells.length > 0}
+          hasGrowth={hasGrowth}
+        />
       </div>
 
       <BackToTop />
