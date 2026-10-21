@@ -34,6 +34,18 @@ export interface MilestoneInput {
   tags?: string[];
   /** 標成重點：卡片加強調，並排進「重點」篩選 */
   highlight?: boolean;
+  /** 分享單筆連結用的固定代號；不寫就用日期加標題算一個，之後改標題連結會變 */
+  id?: string;
+  /** 對應 data/checklist.ts 的發展里程碑代號，例如 "rollOver"，清單就會打勾並連到這筆 */
+  milestone?: string;
+}
+
+/** 發展里程碑清單的一項，月齡是常見範圍 */
+export interface ChecklistItem {
+  key: string;
+  label: string;
+  from: number;
+  to: number;
 }
 
 /** 手寫在 data/babies.ts 的一個寶寶 */
@@ -65,6 +77,8 @@ export interface SiteConfig {
 export interface Milestone {
   /** 原始陣列索引，同日期時用來穩定排序 */
   i: number;
+  /** 網址用的固定代號 */
+  id: string;
   date: Date;
   end: Date | null;
   title: string;
@@ -81,6 +95,7 @@ export interface Milestone {
   people: string[];
   tags: string[];
   highlight: boolean;
+  milestone: string | null;
 }
 
 /** 出生也是時間軸上的一個節點，跟里程碑一起排 */

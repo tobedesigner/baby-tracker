@@ -1,0 +1,30 @@
+/* 發展里程碑清單 */
+
+.checklist{margin-top:36px}
+.checklist h2{font-size:15px;margin:0 0 4px;font-weight:600}
+.checklist p.hint{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.checklist .progress{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.checklist .progress b{color:var(--wc,var(--ink-2));font-weight:600;margin-right:4px}
+
+.ck{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.ck-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 14px;border-top:1px solid var(--line)}
+.ck-row:first-child{border-top:0}
+.ck-what{flex:1 1 10em;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ck-what b{font-weight:600;font-size:14px;color:var(--ink-2)}
+.ck-row.done .ck-what b{color:var(--ink)}
+.ck-what span{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ck-cells{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.ck-cell{
+  display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
+  font-size:12px;color:var(--muted);background:var(--surface-2);border-radius:999px;padding:3px 10px;
+  font-variant-numeric:tabular-nums;
+}
+.ck-cell b{font-weight:600;color:var(--wc,var(--ink-2))}
+.ck-cell.now{color:var(--wc,var(--accent));background:color-mix(in srgb,var(--wc,var(--accent)) 12%,transparent)}
+button.ck-cell{
+  appearance:none;border:0;cursor:pointer;font-family:inherit;
+  color:var(--ink);background:color-mix(in srgb,var(--wc,var(--accent)) 18%,transparent);
+  transition:background .15s;
+}
+button.ck-cell:hover{background:color-mix(in srgb,var(--wc,var(--accent)) 30%,transparent)}
+button.ck-cell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}

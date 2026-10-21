@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Baby, Measures, Milestone, View } from "../types";
 import { CATS } from "../lib/categories";
 import { fmtRange, spanDays } from "../lib/date";
 import { ageChips, dotColor } from "../lib/milestones";
 import { assetUrl, thumbOf } from "../lib/asset";
+import { copyText, permalink } from "../lib/permalink";
 
 interface Props {
   m: Milestone;
@@ -14,6 +15,9 @@ interface Props {
   allIds: string[];
   tag: string | null;
   onTag: (tag: string) => void;
+  /** 從分享連結或清單跳過來的那一筆：捲過去並強調 */
+  isTarget: boolean;
+  targetN: number;
   onOpenPhoto: (photos: string[], index: number, alt: string) => void;
 }
 
@@ -23,10 +27,39 @@ const MEASURE_FIELDS: { key: keyof Measures; label: string; unit: string }[] = [
   { key: "head", label: "頭圍", unit: "cm" },
 ];
 
-export function MilestoneCard({ m, view, multi, byId, allIds, tag, onTag, onOpenPhoto }: Props) {
+export function MilestoneCard({
+  m,
+  view,
+  multi,
+  byId,
+  allIds,
+  tag,
+  onTag,
+  isTarget,
+  targetN,
+  onOpenPhoto,
+}: Props) {
   // 卡片先載縮圖（a.thumb.webp），沒有縮圖就退回原圖，原圖也沒有就整張收起來不留破圖
   const [noThumb, setNoThumb] = useState<string[]>([]);
   const [broken, setBroken] = useState<string[]>([]);
+  const [copied, setCopied] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!isTarget || !ref.current) return;
+    ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [isTarget, targetN]);
+
+  const share = async () => {
+    const url = permalink(m.id, view);
+    const ok = await copyText(url);
+    if (!ok) {
+      window.prompt("複製這個連結：", url);
+      return;
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
 
   const color = dotColor(m, view, byId);
   const chips = ageChips(m, view, byId, allIds);
@@ -43,7 +76,9 @@ export function MilestoneCard({ m, view, multi, byId, allIds, tag, onTag, onOpen
 
   return (
     <article
-      className={`item${m.highlight ? " hl" : ""}${m.end ? " range" : ""}`}
+      ref={ref}
+      id={`m-${m.id}`}
+      className={`item${m.highlight ? " hl" : ""}${m.end ? " range" : ""}${isTarget ? " target" : ""}`}
       style={color ? ({ "--c": color } as CSSProperties) : undefined}
     >
       <div className="card">
@@ -81,9 +116,34 @@ export function MilestoneCard({ m, view, multi, byId, allIds, tag, onTag, onOpen
             </span>
           )}
 
-          <span className="cat" style={{ "--cc": m.catColor } as CSSProperties}>
-            <i />
-            {CATS[m.cat].label}
+          <span className="end">
+            <span className="cat" style={{ "--cc": m.catColor } as CSSProperties}>
+              <i />
+              {CATS[m.cat].label}
+            </span>
+            <button
+              type="button"
+              className="share"
+              aria-label="複製這筆的連結"
+              title="複製連結"
+              onClick={share}
+            >
+              {copied ? (
+                "已複製"
+              ) : (
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6.5 9.5a3 3 0 0 0 4.2 0l2-2a3 3 0 0 0-4.2-4.2l-1 1" />
+                  <path d="M9.5 6.5a3 3 0 0 0-4.2 0l-2 2a3 3 0 0 0 4.2 4.2l1-1" />
+                </svg>
+              )}
+            </button>
           </span>
         </div>
 

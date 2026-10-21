@@ -299,3 +299,35 @@ describe("matchesTag / matchesSearch / isPlain", () => {
     expect(isPlain(crit("all", null, { q: " " }))).toBe(true);
   });
 });
+
+describe("id / milestone", () => {
+  it("沒寫 id 就用日期加標題與人算，同樣輸入永遠同樣結果", async () => {
+    const { milestoneId } = await import("./milestones");
+    const a = milestoneId({ date: "2026-10-16", title: "細支氣管炎", who: ["uwa"] });
+    expect(a).toMatch(/^2026-10-16-[0-9a-z]{5}$/);
+    expect(milestoneId({ date: "2026-10-16", title: "細支氣管炎", who: ["uwa"] })).toBe(a);
+    expect(milestoneId({ date: "2026-10-16", title: "細支氣管炎", who: ["una"] })).not.toBe(a);
+    expect(milestoneId({ date: "2026-10-16", title: "細支氣管炎", who: ["uwa"], id: "rsv" })).toBe(
+      "rsv",
+    );
+  });
+
+  it("正規化後每筆都有代號，撞到的加序號", () => {
+    const { items } = norm([
+      { date: "2026-10-01", title: "健檢", who: ["uwa"] },
+      { date: "2026-10-01", title: "健檢", who: ["uwa"] },
+      { date: "2026-10-01", title: "健檢", who: ["uwa"], id: "fixed" },
+    ]);
+    expect(items[1].id).toBe(`${items[0].id}-2`);
+    expect(items[2].id).toBe("fixed");
+  });
+
+  it("milestone 欄位原樣帶過去，沒寫是 null", () => {
+    const { items } = norm([
+      { date: "2026-06-20", title: "翻身", who: ["uwa"], milestone: "rollOver" },
+      { date: "2026-06-21", title: "x" },
+    ]);
+    expect(items[0].milestone).toBe("rollOver");
+    expect(items[1].milestone).toBeNull();
+  });
+});

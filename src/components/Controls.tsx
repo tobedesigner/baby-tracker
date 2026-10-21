@@ -2,6 +2,11 @@ import { useEffect, useRef } from "react";
 import type { CategoryKey, Filter, Milestone, Order } from "../types";
 import { CATEGORY_KEYS, CATS } from "../lib/categories";
 
+export interface MonthOption {
+  ym: string;
+  label: string;
+}
+
 interface Props {
   /** 目前檢視、標籤與搜尋都套完後看得到的里程碑，用來算每個分類的筆數 */
   pool: Milestone[];
@@ -13,13 +18,16 @@ interface Props {
   onQuery: (q: string) => void;
   searchOpen: boolean;
   onSearchOpen: (open: boolean) => void;
+  /** 時間軸裡有的月份，給「跳到」用 */
+  months: MonthOption[];
+  onJump: (ym: string) => void;
   countLabel: string;
   order: Order;
   onToggleOrder: () => void;
   stuck: boolean;
 }
 
-/** 分類篩選 + 標籤 + 搜尋 + 筆數 + 排序切換。手機版會吸在畫面最上方，搜尋框只在打開時佔空間。 */
+/** 分類篩選 + 標籤 + 搜尋 + 跳到月份 + 筆數 + 排序切換。手機版會吸在畫面最上方，搜尋框只在打開時佔空間。 */
 export function Controls({
   pool,
   filter,
@@ -30,6 +38,8 @@ export function Controls({
   onQuery,
   searchOpen,
   onSearchOpen,
+  months,
+  onJump,
   countLabel,
   order,
   onToggleOrder,
@@ -115,6 +125,23 @@ export function Controls({
       <div className="meta-row">
         <span>{countLabel}</span>
         <span className="actions">
+          {months.length > 1 && (
+            <select
+              className="jump"
+              aria-label="跳到月份"
+              value=""
+              onChange={(e) => {
+                if (e.target.value) onJump(e.target.value);
+              }}
+            >
+              <option value="">跳到月份</option>
+              {months.map((mo) => (
+                <option key={mo.ym} value={mo.ym}>
+                  {mo.label}
+                </option>
+              ))}
+            </select>
+          )}
           {!searchOpen && (
             <button className="iconbtn" type="button" onClick={() => onSearchOpen(true)}>
               <SearchIcon />

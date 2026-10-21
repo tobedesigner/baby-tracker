@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Filter, Order } from "./types";
 import { isBirthRow } from "./types";
 import { BABIES } from "./data/babies";
+import { CHECKLIST } from "./data/checklist";
 import { MILESTONES } from "./data/milestones";
 import { SITE } from "./data/site";
-import { fmtDate } from "./lib/date";
+import { fmtDate, today, ymKey } from "./lib/date";
 import type { Criteria } from "./lib/milestones";
 import {
   inView,
@@ -17,8 +18,14 @@ import {
   normalizeMilestones,
   visibleRows,
 } from "./lib/milestones";
+import { checklistRows } from "./lib/checklist";
+import { readTargetId } from "./lib/permalink";
+import type { Target } from "./lib/target";
 import { defaultView, useHashView } from "./lib/useHashView";
 import { useStuck } from "./lib/useStuck";
+import { BackToTop } from "./components/BackToTop";
+import { Checklist } from "./components/Checklist";
+import type { MonthOption } from "./components/Controls";
 import { GrowthCharts } from "./components/GrowthCharts";
 import { Lightbox } from "./components/Lightbox";
 import { Sidebar } from "./components/Sidebar";
@@ -53,6 +60,8 @@ export function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [order, setOrder] = useState<Order>(SITE.defaultOrder === "oldest" ? 1 : -1);
   const [photo, setPhoto] = useState<OpenPhoto | null>(null);
+  // 從分享連結或清單跳過來要捲到的那一筆
+  const [target, setTarget] = useState<Target | null>(null);
 
   const baby = view === "all" ? null : (byId[view] ?? null);
 
@@ -101,6 +110,27 @@ export function App() {
   const countLabel = `${shown} 則${badCount ? `（${badCount} 筆格式有誤已略過）` : ""}`;
   const last = useMemo(() => lastRecordDate(items), [items]);
 
+  // 時間軸裡有的月份，照目前排序，給「跳到」用
+  const months = useMemo(() => {
+    const out: MonthOption[] = [];
+    rows.forEach((r) => {
+      const ym = ymKey(r.date);
+      if (!out.some((o) => o.ym === ym)) {
+        out.push({ ym, label: `${r.date.getFullYear()} 年 ${r.date.getMonth() + 1} 月` });
+      }
+    });
+    return out;
+  }, [rows]);
+  const jumpTo = useCallback((ym: string) => {
+    document.getElementById(`ym-${ym}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const now = useMemo(() => today(), []);
+  const ckRows = useMemo(
+    () => checklistRows(CHECKLIST, items, babies, view, allIds, now),
+    [items, babies, view, allIds, now],
+  );
+
   const { sentinelRef, stuck } = useStuck();
   const closePhoto = useCallback(() => setPhoto(null), []);
   // 點卡片上的標籤：點已選的那個就取消
@@ -111,6 +141,27 @@ export function App() {
     setQ("");
     setSearchOpen(false);
   }, []);
+
+  /** 捲到某一筆：先確定它在目前條件下看得到，看不到就切回「全部」並清掉篩選 */
+  const goTo = useCallback(
+    (id: string) => {
+      const m = items.find((x) => x.id === id);
+      if (!m) return;
+      if (!inView(m, view, allIds)) setView("all");
+      clearAll();
+      setTarget((t) => ({ id, n: (t?.n ?? 0) + 1 }));
+    },
+    [items, view, allIds, setView, clearAll],
+  );
+
+  // 開站時網址有 ?m=<id> 就直接捲到那筆；只做一次
+  const [booted, setBooted] = useState(false);
+  useEffect(() => {
+    if (booted) return;
+    setBooted(true);
+    const id = readTargetId();
+    if (id) goTo(id);
+  }, [booted, goTo]);
 
   return (
     <>
@@ -131,6 +182,8 @@ export function App() {
           onQuery={setQ}
           searchOpen={searchOpen}
           onSearchOpen={setSearchOpen}
+          months={months}
+          onJump={jumpTo}
           countLabel={countLabel}
           order={order}
           onToggleOrder={() => setOrder((o) => (o === -1 ? 1 : -1))}
@@ -149,14 +202,18 @@ export function App() {
             onTag={toggleTag}
             filtered={!isPlain(criteria)}
             onClear={clearAll}
+            target={target}
             onOpenPhoto={(photos, index, alt) => setPhoto({ photos, index, alt })}
           />
+          <Checklist rows={ckRows} multi={multi && view === "all"} onJump={goTo} />
           <GrowthCharts items={items} babies={babies} view={view} byId={byId} />
           <footer>
             <div>{last ? `最後一筆紀錄：${fmtDate(last)}` : "還沒有任何紀錄"}</div>
           </footer>
         </div>
       </div>
+
+      <BackToTop />
 
       {photo && (
         <Lightbox photos={photo.photos} start={photo.index} alt={photo.alt} onClose={closePhoto} />

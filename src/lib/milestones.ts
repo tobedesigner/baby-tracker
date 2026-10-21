@@ -12,6 +12,9 @@ import type {
 } from "../types";
 import { CATS, DEFAULT_CATEGORY, isCategoryKey } from "./categories";
 import { ageText, diff, parseDate } from "./date";
+import { milestoneId } from "./id";
+
+export { milestoneId, shortHash } from "./id";
 
 /** 生日字串解析成 Date，並建好 id 索引 */
 export function normalizeBabies(input: BabyInput[]): {
@@ -46,6 +49,7 @@ export function normalizeMilestones(
   raw: MilestoneInput[],
   byId: Record<string, Baby>,
 ): { items: Milestone[]; badCount: number } {
+  const seenIds = new Set<string>();
   const items = raw
     .map((r, i): Milestone | null => {
       const date = parseDate(r.date);
@@ -82,8 +86,19 @@ export function normalizeMilestones(
         warn(i, r, "有 measures 但 who 不是剛好一個人，這筆數字不會進生長曲線");
       }
 
+      // 代號撞到就加序號，連結至少還開得到；npm run check 會要求改成不同的 id
+      let id = milestoneId(r);
+      if (seenIds.has(id)) {
+        warn(i, r, `代號 ${id} 跟另一筆重複，請加一個不同的 id`);
+        let n = 2;
+        while (seenIds.has(`${id}-${n}`)) n += 1;
+        id = `${id}-${n}`;
+      }
+      seenIds.add(id);
+
       return {
         i,
+        id,
         date,
         end: end && end > date ? end : null,
         title: String(r.title).trim(),
@@ -99,6 +114,7 @@ export function normalizeMilestones(
         people: r.people ?? [],
         tags: r.tags ?? [],
         highlight: !!r.highlight,
+        milestone: r.milestone ?? null,
       };
     })
     .filter((m): m is Milestone => m !== null);

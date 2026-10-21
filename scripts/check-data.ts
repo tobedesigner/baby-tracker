@@ -8,6 +8,8 @@ import path from "node:path";
 import { BABIES } from "../src/data/babies.ts";
 import { MILESTONES } from "../src/data/milestones.ts";
 import { SITE } from "../src/data/site.ts";
+import { CHECKLIST } from "../src/data/checklist.ts";
+import { milestoneId } from "../src/lib/id.ts";
 import { thumbOf } from "../src/lib/asset.ts";
 import { CATS, isCategoryKey } from "../src/lib/categories.ts";
 import { parseDate } from "../src/lib/date.ts";
@@ -55,6 +57,18 @@ const today = new Date();
 today.setHours(23, 59, 59, 999);
 const seen = new Map<string, number>();
 const usedPhotos = new Set<string>();
+const seenIds = new Map<string, number>();
+const seenMilestone = new Map<string, number>();
+const ckKeys = new Set(CHECKLIST.map((c) => c.key));
+
+/* ---------- 發展里程碑清單本身 ---------- */
+CHECKLIST.forEach((c, i) => {
+  if (!c.key || !/^[A-Za-z][A-Za-z0-9]*$/.test(c.key))
+    errors.push(`checklist[${i}]：key「${c.key}」要是英數字`);
+  if (CHECKLIST.findIndex((x) => x.key === c.key) !== i)
+    errors.push(`checklist[${i}]：key「${c.key}」重複`);
+  if (!(c.from <= c.to)) errors.push(`checklist[${i}]「${c.label}」：from 要小於等於 to`);
+});
 
 MILESTONES.forEach((r, i) => {
   const at = label(i, r);
@@ -120,6 +134,40 @@ MILESTONES.forEach((r, i) => {
       );
     }
   });
+
+  // 分享連結的代號
+  if (date && r.title) {
+    const id = milestoneId(r);
+    if (r.id !== undefined && (!r.id.trim() || /[s#?&/]/.test(r.id))) {
+      errors.push(`${at}：id「${r.id}」不能有空白或 # ? & / 這些符號`);
+    }
+    const prev = seenIds.get(id);
+    if (prev !== undefined) {
+      errors.push(
+        `${at}：分享連結的代號跟第 ${prev + 1} 筆一樣（${id}），請在其中一筆加 id: "..." 區分`,
+      );
+    }
+    seenIds.set(id, i);
+  }
+
+  // 發展里程碑
+  if (r.milestone !== undefined) {
+    if (!ckKeys.has(r.milestone)) {
+      errors.push(
+        `${at}：milestone「${r.milestone}」不在 checklist.ts 裡，可用：${[...ckKeys].join("、")}`,
+      );
+    } else {
+      (r.who && r.who.length ? r.who : [...ids]).forEach((who) => {
+        const k = `${who}|${r.milestone}`;
+        const prev = seenMilestone.get(k);
+        if (prev !== undefined)
+          warns.push(
+            `${at}：${who} 的 milestone「${r.milestone}」第 ${prev + 1} 筆也有，清單會取最早那筆`,
+          );
+        seenMilestone.set(k, i);
+      });
+    }
+  }
 
   if (date && r.title) {
     const key = `${r.date}|${String(r.title).trim()}|${(r.who ?? []).join(",")}`;

@@ -92,3 +92,19 @@ export function today(): Date {
   d.setHours(0, 0, 0, 0);
   return d;
 }
+
+/** 下一個生日：日期、滿幾歲、還有幾天。今天就是生日時 days 是 0；還沒出生時 years 是 0、算到出生那天 */
+export function nextBirthday(bd: Date, now: Date): { date: Date; years: number; days: number } {
+  let years = Math.max(0, now.getFullYear() - bd.getFullYear());
+  let date = addMonths(bd, years * 12);
+  if (date < now) {
+    years += 1;
+    date = addMonths(bd, years * 12);
+  }
+  return { date, years, days: Math.round((date.getTime() - now.getTime()) / DAY_MS) };
+}
+
+/** "2026-10"：月份分隔與跳轉用的鍵 */
+export function ymKey(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+}

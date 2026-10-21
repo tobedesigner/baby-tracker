@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import type { Baby, Filter, Milestone, Order, SiteConfig, View } from "../types";
 import { AgePills } from "./AgePills";
+import type { MonthOption } from "./Controls";
 import { Controls } from "./Controls";
 import { WhoSwitch } from "./WhoSwitch";
 
@@ -20,6 +21,8 @@ interface Props {
   onQuery: (q: string) => void;
   searchOpen: boolean;
   onSearchOpen: (open: boolean) => void;
+  months: MonthOption[];
+  onJump: (ym: string) => void;
   countLabel: string;
   order: Order;
   onToggleOrder: () => void;
@@ -44,6 +47,8 @@ export function Sidebar({
   onQuery,
   searchOpen,
   onSearchOpen,
+  months,
+  onJump,
   countLabel,
   order,
   onToggleOrder,
@@ -73,6 +78,8 @@ export function Sidebar({
         onQuery={onQuery}
         searchOpen={searchOpen}
         onSearchOpen={onSearchOpen}
+        months={months}
+        onJump={onJump}
         countLabel={countLabel}
         order={order}
         onToggleOrder={onToggleOrder}

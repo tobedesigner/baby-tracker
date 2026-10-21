@@ -1,6 +1,8 @@
 import { Fragment } from "react";
 import type { Baby, Row, View } from "../types";
 import { isBirthRow } from "../types";
+import { ymKey } from "../lib/date";
+import type { Target } from "../lib/target";
 import { BirthCard } from "./BirthCard";
 import { MilestoneCard } from "./MilestoneCard";
 
@@ -15,19 +17,40 @@ interface Props {
   /** 有套任何篩選或搜尋：空列表時顯示「沒有符合」而不是「還沒有紀錄」 */
   filtered: boolean;
   onClear: () => void;
+  /** 要捲過去並強調的那一筆 */
+  target: Target | null;
   onOpenPhoto: (photos: string[], index: number, alt: string) => void;
 }
 
-/** 依年份切段，每一段一條軸線 */
-function groupByYear(rows: Row[]): { year: number; rows: Row[] }[] {
-  const groups: { year: number; rows: Row[] }[] = [];
+interface MonthGroup {
+  ym: string;
+  label: string;
+  rows: Row[];
+}
+interface YearGroup {
+  year: number;
+  months: MonthGroup[];
+}
+
+/** 依年份切段、年份裡再依月份分小節。每一年一條軸線，月份是軸線上的小標 */
+function groupRows(rows: Row[]): YearGroup[] {
+  const years: YearGroup[] = [];
   rows.forEach((row) => {
     const year = row.date.getFullYear();
-    const last = groups[groups.length - 1];
-    if (!last || last.year !== year) groups.push({ year, rows: [row] });
-    else last.rows.push(row);
+    const ym = ymKey(row.date);
+    let y = years[years.length - 1];
+    if (!y || y.year !== year) {
+      y = { year, months: [] };
+      years.push(y);
+    }
+    let mo = y.months[y.months.length - 1];
+    if (!mo || mo.ym !== ym) {
+      mo = { ym, label: `${row.date.getMonth() + 1} 月`, rows: [] };
+      y.months.push(mo);
+    }
+    mo.rows.push(row);
   });
-  return groups;
+  return years;
 }
 
 export function Timeline({
@@ -40,6 +63,7 @@ export function Timeline({
   onTag,
   filtered,
   onClear,
+  target,
   onOpenPhoto,
 }: Props) {
   if (!rows.length) {
@@ -63,29 +87,38 @@ export function Timeline({
 
   return (
     <main id="list">
-      {groupByYear(rows).map((g) => (
+      {groupRows(rows).map((g) => (
         <Fragment key={g.year}>
           <div className="year">
             <span>{g.year} 年</span>
           </div>
           <div className="tl">
-            {g.rows.map((row) =>
-              isBirthRow(row) ? (
-                <BirthCard key={`birth-${row.baby.id}`} row={row} view={view} multi={multi} />
-              ) : (
-                <MilestoneCard
-                  key={`m-${row.i}`}
-                  m={row}
-                  view={view}
-                  multi={multi}
-                  byId={byId}
-                  allIds={allIds}
-                  tag={tag}
-                  onTag={onTag}
-                  onOpenPhoto={onOpenPhoto}
-                />
-              ),
-            )}
+            {g.months.map((mo) => (
+              <Fragment key={mo.ym}>
+                <div className="month" id={`ym-${mo.ym}`}>
+                  <span>{mo.label}</span>
+                </div>
+                {mo.rows.map((row) =>
+                  isBirthRow(row) ? (
+                    <BirthCard key={`birth-${row.baby.id}`} row={row} view={view} multi={multi} />
+                  ) : (
+                    <MilestoneCard
+                      key={`m-${row.i}`}
+                      m={row}
+                      view={view}
+                      multi={multi}
+                      byId={byId}
+                      allIds={allIds}
+                      tag={tag}
+                      onTag={onTag}
+                      isTarget={target?.id === row.id}
+                      targetN={target?.n ?? 0}
+                      onOpenPhoto={onOpenPhoto}
+                    />
+                  ),
+                )}
+              </Fragment>
+            ))}
           </div>
         </Fragment>
       ))}

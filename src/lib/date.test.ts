@@ -109,3 +109,32 @@ describe("fmtRange / spanDays", () => {
     expect(spanDays(d(2026, 7, 30), d(2026, 7, 30))).toBe(1);
   });
 });
+
+describe("nextBirthday", () => {
+  // 延後 import，讓上面的 describe 不用動
+  it("算到下一個生日還有幾天、滿幾歲", async () => {
+    const { nextBirthday } = await import("./date");
+    const bd = d(2026, 2, 6);
+    expect(nextBirthday(bd, d(2026, 10, 21))).toMatchObject({ years: 1, days: 108 });
+    expect(nextBirthday(bd, d(2027, 2, 6))).toMatchObject({ years: 1, days: 0 });
+    expect(nextBirthday(bd, d(2027, 2, 7))).toMatchObject({ years: 2, days: 364 });
+  });
+
+  it("2/29 出生的平年用 2/28", async () => {
+    const { nextBirthday } = await import("./date");
+    const r = nextBirthday(d(2024, 2, 29), d(2025, 1, 1));
+    expect(r.date).toEqual(d(2025, 2, 28));
+    expect(r).toMatchObject({ years: 1, days: 58 });
+  });
+
+  it("還沒出生就算到出生那天", async () => {
+    const { nextBirthday } = await import("./date");
+    expect(nextBirthday(d(2026, 12, 1), d(2026, 10, 21))).toMatchObject({ years: 0, days: 41 });
+  });
+
+  it("ymKey", async () => {
+    const { ymKey } = await import("./date");
+    expect(ymKey(d(2026, 10, 21))).toBe("2026-10");
+    expect(ymKey(d(2026, 1, 1))).toBe("2026-01");
+  });
+});
