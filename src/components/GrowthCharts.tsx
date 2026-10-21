@@ -1,8 +1,8 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import type { Baby, Measures, Milestone, View } from "../types";
 import type { GrowthPoint } from "../lib/milestones";
 import { seriesFor } from "../lib/milestones";
-import { fmtDate } from "../lib/date";
+import { fmtDate, fmtShort } from "../lib/date";
 import { useWidth } from "../lib/useWidth";
 
 interface Spec {
@@ -19,8 +19,6 @@ const SPECS: Spec[] = [
 /** 圖的高度（px），要跟 growth.css 的 .chart svg 高度一致 */
 const H = 96;
 const PAD = 6;
-/** 還沒量到容器寬度前先用這個值 */
-const FALLBACK_W = 260;
 
 interface Series {
   baby: Baby;
@@ -53,7 +51,7 @@ export function GrowthCharts({ items, babies, view, byId }: Props) {
       <h2>生長紀錄</h2>
       <p className="hint">
         {who.length > 1 ? "橫軸是月齡，兩個人疊在一起就能比同月齡的差別。" : "橫軸是月齡。"}
-        點圓點看當次數值。
+        點一下圓點看當次數值。
       </p>
       <div className="charts">
         {charts.map((c) => (
@@ -65,9 +63,10 @@ export function GrowthCharts({ items, babies, view, byId }: Props) {
 }
 
 function Chart({ spec, sets }: { spec: Spec; sets: Series[] }) {
-  // viewBox 的寬度跟容器實際像素寬一致、不做拉伸，圓點才會是正圓
-  const { ref, width } = useWidth<HTMLDivElement>();
-  const W = width || FALLBACK_W;
+  // viewBox 的寬度跟容器實際像素寬一致、不做拉伸，圓點才會是正圓；量到寬度之前先不畫
+  const { ref, width: W } = useWidth<HTMLDivElement>();
+  // 點過的那一點：手機沒有 hover，title 看不到，所以點一下把數值畫在圖上
+  const [active, setActive] = useState<string | null>(null);
 
   const xs = sets.flatMap((s) => s.pts.map((p) => p.x));
   const vs = sets.flatMap((s) => s.pts.map((p) => p.v));
@@ -82,6 +81,7 @@ function Chart({ spec, sets }: { spec: Spec; sets: Series[] }) {
   const line = (pts: GrowthPoint[]) => pts.map((p) => `${sx(p.x)},${sy(p.v)}`).join(" ");
 
   const solo = sets.length === 1;
+  const keyOf = (s: Series, p: GrowthPoint) => `${s.baby.id}-${p.d.getTime()}`;
 
   return (
     <div className="chart">
@@ -108,45 +108,93 @@ function Chart({ spec, sets }: { spec: Spec; sets: Series[] }) {
         </div>
       )}
 
-      <div ref={ref}>
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${spec.label}曲線`}>
-          {sets.map((s) => {
-            const color = s.baby.accent || "#E08A6E";
-            const last = s.pts[s.pts.length - 1];
-            return (
-              <Fragment key={s.baby.id}>
-                {solo && (
-                  <polygon
-                    points={`${line(s.pts)} ${sx(last.x)},${H} ${sx(s.pts[0].x)},${H}`}
-                    fill={color}
-                    opacity=".10"
-                  />
-                )}
-                <polyline
-                  points={line(s.pts)}
-                  fill="none"
-                  stroke={color}
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-                {s.pts.map((p) => (
-                  <circle
-                    key={`${p.d.getTime()}-${p.v}`}
-                    cx={sx(p.x)}
-                    cy={sy(p.v)}
-                    r="3"
-                    fill="var(--surface)"
+      <div ref={ref} className="plot">
+        {W > 0 && (
+          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${spec.label}曲線`}>
+            {sets.map((s) => {
+              const color = s.baby.accent || "#E08A6E";
+              const last = s.pts[s.pts.length - 1];
+              return (
+                <Fragment key={s.baby.id}>
+                  {solo && (
+                    <polygon
+                      points={`${line(s.pts)} ${sx(last.x)},${H} ${sx(s.pts[0].x)},${H}`}
+                      fill={color}
+                      opacity=".10"
+                    />
+                  )}
+                  <polyline
+                    points={line(s.pts)}
+                    fill="none"
                     stroke={color}
-                    strokeWidth="1.8"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                  {s.pts.map((p) => {
+                    const k = keyOf(s, p);
+                    const on = active === k;
+                    const toggle = () => setActive(on ? null : k);
+                    return (
+                      <g key={k}>
+                        <circle
+                          className="pt"
+                          cx={sx(p.x)}
+                          cy={sy(p.v)}
+                          r={on ? 4.5 : 3}
+                          fill={on ? color : "var(--surface)"}
+                          stroke={color}
+                          strokeWidth="1.8"
+                        >
+                          <title>{`${s.baby.name}　${fmtDate(p.d)}　${p.v} ${spec.unit}`}</title>
+                        </circle>
+                        {/* 看不見的大圓當點擊範圍，手指才點得到 */}
+                        <circle
+                          className="hit"
+                          cx={sx(p.x)}
+                          cy={sy(p.v)}
+                          r="12"
+                          tabIndex={0}
+                          role="button"
+                          aria-pressed={on}
+                          aria-label={`${s.baby.name} ${fmtShort(p.d)} ${p.v} ${spec.unit}`}
+                          onClick={toggle}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              toggle();
+                            }
+                          }}
+                        />
+                      </g>
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
+            {/* 標籤最後畫，才不會被別條線蓋住 */}
+            {sets.map((s) =>
+              s.pts.map((p) => {
+                if (active !== keyOf(s, p)) return null;
+                const x = sx(p.x);
+                const y = sy(p.v);
+                // 太靠上就改畫在點的下面；太靠左右就改對齊方式
+                const below = y < 24;
+                const anchor = x < 60 ? "start" : x > W - 60 ? "end" : "middle";
+                return (
+                  <text
+                    key={`lbl-${keyOf(s, p)}`}
+                    x={x}
+                    y={below ? y + 18 : y - 10}
+                    textAnchor={anchor}
                   >
-                    <title>{`${s.baby.name}　${fmtDate(p.d)}　${p.v} ${spec.unit}`}</title>
-                  </circle>
-                ))}
-              </Fragment>
-            );
-          })}
-        </svg>
+                    {`${solo ? "" : `${s.baby.name} `}${fmtShort(p.d)}　${p.v} ${spec.unit}`}
+                  </text>
+                );
+              }),
+            )}
+          </svg>
+        )}
       </div>
 
       <div className="xl">
