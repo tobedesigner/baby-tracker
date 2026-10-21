@@ -10,7 +10,7 @@ interface Props {
   multi: boolean;
   byId: Record<string, Baby>;
   allIds: string[];
-  onOpenPhoto: (src: string, alt: string) => void;
+  onOpenPhoto: (photos: string[], index: number, alt: string) => void;
 }
 
 /** 依年份切段，每一段一條軸線 */

@@ -8,16 +8,23 @@ import { fmtDate } from "./lib/date";
 import {
   inView,
   lastRecordDate,
+  matchesFilter,
   normalizeBabies,
   normalizeMilestones,
   visibleRows,
 } from "./lib/milestones";
-import { initialView, useHashView } from "./lib/useHashView";
+import { defaultView, useHashView } from "./lib/useHashView";
 import { useStuck } from "./lib/useStuck";
 import { GrowthCharts } from "./components/GrowthCharts";
 import { Lightbox } from "./components/Lightbox";
 import { Sidebar } from "./components/Sidebar";
 import { Timeline } from "./components/Timeline";
+
+interface OpenPhoto {
+  photos: string[];
+  index: number;
+  alt: string;
+}
 
 export function App() {
   const { babies, byId, allIds } = useMemo(() => normalizeBabies(BABIES), []);
@@ -30,13 +37,13 @@ export function App() {
     [multi, byId],
   );
   const [view, setView] = useHashView(
-    useMemo(() => initialView(SITE, byId, allIds), [byId, allIds]),
+    useMemo(() => defaultView(SITE, byId, allIds), [byId, allIds]),
     isValidView,
   );
 
   const [filter, setFilter] = useState<Filter>(null);
   const [order, setOrder] = useState<Order>(SITE.defaultOrder === "oldest" ? 1 : -1);
-  const [photo, setPhoto] = useState<{ src: string; alt: string } | null>(null);
+  const [photo, setPhoto] = useState<OpenPhoto | null>(null);
 
   const baby = view === "all" ? null : (byId[view] ?? null);
 
@@ -51,6 +58,16 @@ export function App() {
     () => items.filter((m) => inView(m, view, allIds)),
     [items, view, allIds],
   );
+
+  // 切換看誰之後，原本的篩選若在新範圍裡一筆都沒有就退回「全部」，
+  // 不然 chip 消失、列表空白，卻看不出是哪個篩選造成的。
+  // 在 render 期間調整 state 是 React 建議的作法，不會先畫出空白再跳回來。
+  const [prevView, setPrevView] = useState(view);
+  if (view !== prevView) {
+    setPrevView(view);
+    if (filter !== null && !pool.some((m) => matchesFilter(m, filter))) setFilter(null);
+  }
+
   const rows = useMemo(
     () => visibleRows(items, babies, allIds, view, filter, order),
     [items, babies, allIds, view, filter, order],
@@ -90,7 +107,7 @@ export function App() {
             multi={multi}
             byId={byId}
             allIds={allIds}
-            onOpenPhoto={(src, alt) => setPhoto({ src, alt })}
+            onOpenPhoto={(photos, index, alt) => setPhoto({ photos, index, alt })}
           />
           <GrowthCharts items={items} babies={babies} view={view} byId={byId} />
           <footer>
@@ -99,7 +116,9 @@ export function App() {
         </div>
       </div>
 
-      <Lightbox src={photo?.src ?? null} alt={photo?.alt ?? ""} onClose={closePhoto} />
+      {photo && (
+        <Lightbox photos={photo.photos} start={photo.index} alt={photo.alt} onClose={closePhoto} />
+      )}
     </>
   );
 }

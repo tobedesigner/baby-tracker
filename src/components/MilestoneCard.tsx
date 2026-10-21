@@ -12,7 +12,7 @@ interface Props {
   multi: boolean;
   byId: Record<string, Baby>;
   allIds: string[];
-  onOpenPhoto: (src: string, alt: string) => void;
+  onOpenPhoto: (photos: string[], index: number, alt: string) => void;
 }
 
 const MEASURE_FIELDS: { key: keyof Measures; label: string; unit: string }[] = [
@@ -101,16 +101,20 @@ export function MilestoneCard({ m, view, multi, byId, allIds, onOpenPhoto }: Pro
 
         {photos.length > 0 && (
           <div className={`shots${photos.length === 1 ? " one" : ""}`}>
-            {photos.map((src) => (
-              <img
+            {photos.map((src, idx) => (
+              <button
                 key={src}
-                src={assetUrl(src)}
-                alt={m.title}
-                loading="lazy"
-                decoding="async"
-                onClick={() => onOpenPhoto(assetUrl(src), m.title)}
-                onError={() => setBroken((prev) => [...prev, src])}
-              />
+                type="button"
+                onClick={() => onOpenPhoto(photos.map(assetUrl), idx, m.title)}
+              >
+                <img
+                  src={assetUrl(src)}
+                  alt={m.title}
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => setBroken((prev) => [...prev, src])}
+                />
+              </button>
             ))}
           </div>
         )}

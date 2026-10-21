@@ -78,6 +78,13 @@ export function inView(m: Milestone, view: View, allIds: string[]): boolean {
   return view === "all" || idsOf(m, allIds).indexOf(view) >= 0;
 }
 
+/** 分類篩選：null＝全部、"hl"＝重點、其餘比對分類代號 */
+export function matchesFilter(m: Milestone, filter: Filter): boolean {
+  if (filter === null) return true;
+  if (filter === "hl") return m.highlight;
+  return m.cat === filter;
+}
+
 /**
  * 套上檢視與分類篩選、插入出生節點、依日期排序。
  * 出生當作時間軸節點跟著日期一起排，產檢這類出生前的紀錄才會排在下面。
@@ -90,12 +97,7 @@ export function visibleRows(
   filter: Filter,
   order: Order,
 ): Row[] {
-  const rows: Row[] = items.filter((m) => {
-    if (!inView(m, view, allIds)) return false;
-    if (filter === null) return true;
-    if (filter === "hl") return m.highlight;
-    return m.cat === filter;
-  });
+  const rows: Row[] = items.filter((m) => inView(m, view, allIds) && matchesFilter(m, filter));
 
   if (filter === null) {
     babies.forEach((baby) => {

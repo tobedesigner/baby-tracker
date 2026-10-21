@@ -177,6 +177,7 @@ src/lib/milestones.ts         資料正規化、篩選排序、生長曲線取�
 src/lib/asset.ts              照片路徑補上部署 base
 src/lib/useHashView.ts        看誰的狀態與網址 hash 同步
 src/lib/useStuck.ts           手機版篩選列吸頂偵測
+src/lib/useWidth.ts           量容器寬度，生長曲線用它讓圓點保持正圓
 
 src/components/Sidebar.tsx    左欄：標題、寶寶切換、年齡、篩選
 src/components/WhoSwitch.tsx  全部／予安／予樂
@@ -186,7 +187,7 @@ src/components/Timeline.tsx   依年份分段的時間軸
 src/components/MilestoneCard.tsx  一筆里程碑的卡片
 src/components/BirthCard.tsx  出生節點
 src/components/GrowthCharts.tsx   生長曲線（SVG，沒有圖表套件）
-src/components/Lightbox.tsx   照片放大
+src/components/Lightbox.tsx   照片放大，多張可左右切換、鍵盤可操作
 
 src/styles/                   樣式，index.css 匯入其餘五個
 public/assets/photos/         照片

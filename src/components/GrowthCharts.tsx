@@ -3,6 +3,7 @@ import type { Baby, Measures, Milestone, View } from "../types";
 import type { GrowthPoint } from "../lib/milestones";
 import { seriesFor } from "../lib/milestones";
 import { fmtDate } from "../lib/date";
+import { useWidth } from "../lib/useWidth";
 
 interface Spec {
   key: keyof Measures;
@@ -15,9 +16,11 @@ const SPECS: Spec[] = [
   { key: "weight", label: "體重", unit: "kg" },
 ];
 
-const W = 260;
+/** 圖的高度（px），要跟 growth.css 的 .chart svg 高度一致 */
 const H = 96;
 const PAD = 6;
+/** 還沒量到容器寬度前先用這個值 */
+const FALLBACK_W = 260;
 
 interface Series {
   baby: Baby;
@@ -62,6 +65,10 @@ export function GrowthCharts({ items, babies, view, byId }: Props) {
 }
 
 function Chart({ spec, sets }: { spec: Spec; sets: Series[] }) {
+  // viewBox 的寬度跟容器實際像素寬一致、不做拉伸，圓點才會是正圓
+  const { ref, width } = useWidth<HTMLDivElement>();
+  const W = width || FALLBACK_W;
+
   const xs = sets.flatMap((s) => s.pts.map((p) => p.x));
   const vs = sets.flatMap((s) => s.pts.map((p) => p.v));
   const x0 = Math.min(...xs);
@@ -101,46 +108,46 @@ function Chart({ spec, sets }: { spec: Spec; sets: Series[] }) {
         </div>
       )}
 
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-        {sets.map((s) => {
-          const color = s.baby.accent || "#E08A6E";
-          const last = s.pts[s.pts.length - 1];
-          return (
-            <Fragment key={s.baby.id}>
-              {solo && (
-                <polygon
-                  points={`${line(s.pts)} ${sx(last.x)},${H} ${sx(s.pts[0].x)},${H}`}
-                  fill={color}
-                  opacity=".10"
-                />
-              )}
-              <polyline
-                points={line(s.pts)}
-                fill="none"
-                stroke={color}
-                strokeWidth="2"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                vectorEffect="non-scaling-stroke"
-              />
-              {s.pts.map((p) => (
-                <circle
-                  key={`${p.d.getTime()}-${p.v}`}
-                  cx={sx(p.x)}
-                  cy={sy(p.v)}
-                  r="2.6"
-                  fill="var(--surface)"
+      <div ref={ref}>
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${spec.label}曲線`}>
+          {sets.map((s) => {
+            const color = s.baby.accent || "#E08A6E";
+            const last = s.pts[s.pts.length - 1];
+            return (
+              <Fragment key={s.baby.id}>
+                {solo && (
+                  <polygon
+                    points={`${line(s.pts)} ${sx(last.x)},${H} ${sx(s.pts[0].x)},${H}`}
+                    fill={color}
+                    opacity=".10"
+                  />
+                )}
+                <polyline
+                  points={line(s.pts)}
+                  fill="none"
                   stroke={color}
-                  strokeWidth="1.8"
-                  vectorEffect="non-scaling-stroke"
-                >
-                  <title>{`${s.baby.name}　${fmtDate(p.d)}　${p.v} ${spec.unit}`}</title>
-                </circle>
-              ))}
-            </Fragment>
-          );
-        })}
-      </svg>
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+                {s.pts.map((p) => (
+                  <circle
+                    key={`${p.d.getTime()}-${p.v}`}
+                    cx={sx(p.x)}
+                    cy={sy(p.v)}
+                    r="3"
+                    fill="var(--surface)"
+                    stroke={color}
+                    strokeWidth="1.8"
+                  >
+                    <title>{`${s.baby.name}　${fmtDate(p.d)}　${p.v} ${spec.unit}`}</title>
+                  </circle>
+                ))}
+              </Fragment>
+            );
+          })}
+        </svg>
+      </div>
 
       <div className="xl">
         <span>{Math.round(x0)} 個月</span>

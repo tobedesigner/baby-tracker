@@ -45,6 +45,8 @@
 .ms b em{font-style:normal;color:var(--muted);font-size:11px;margin-right:4px}
 
 .shots{display:grid;gap:6px;margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
+.shots button{appearance:none;border:0;padding:0;margin:0;background:none;font:inherit;display:block;min-width:0;border-radius:10px;cursor:zoom-in}
+.shots button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .shots img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--surface-2);cursor:zoom-in;display:block}
 .shots.one{grid-template-columns:1fr}
 .shots.one img{aspect-ratio:auto;max-height:60vh;object-fit:contain}
