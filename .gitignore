@@ -6,3 +6,7 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 *.tmp
+
+# 照片原圖不進 git，npm run photos 會把縮好的版本放進 public/assets/photos/
+photos/*
+!photos/README.txt
