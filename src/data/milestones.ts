@@ -39,6 +39,15 @@ import type { MilestoneInput } from "../types";
 
 export const MILESTONES: MilestoneInput[] = [
   {
+    date: "2026-10-23",
+    title: "吃白飯高麗菜紅蘿蔔米粥",
+    who: ["una"],
+    category: "daily",
+    note: "爸爸餵的，白飯、高麗菜、紅蘿蔔一起煮成的米粥。",
+    people: ["爸爸"],
+    tags: ["副食品"],
+  },
+  {
     date: "2026-10-16",
     title: "細支氣管炎",
     who: ["uwa"],
