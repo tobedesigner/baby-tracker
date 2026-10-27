@@ -39,6 +39,24 @@ import type { MilestoneInput } from "../types";
 
 export const MILESTONES: MilestoneInput[] = [
   {
+    date: "2026-10-26",
+    title: "寶寶壓印體驗",
+    who: ["uwa"],
+    category: "travel",
+    place: "鶯歌陶瓷學院",
+    tags: ["壓印", "鶯歌"],
+    highlight: true,
+  },
+  {
+    date: "2026-10-26",
+    title: "寶寶壓印體驗",
+    who: ["una"],
+    category: "travel",
+    place: "鶯歌陶瓷學院",
+    tags: ["壓印", "鶯歌"],
+    highlight: true,
+  },
+  {
     date: "2026-10-23",
     title: "吃白飯高麗菜紅蘿蔔米粥",
     who: ["una"],
